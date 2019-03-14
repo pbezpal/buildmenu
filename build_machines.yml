@@ -1,0 +1,27 @@
+---
+
+- name: Prepare build servers
+  hosts: setup
+  # become: True
+  tasks:
+    - name: Install packages
+      win_chocolatey:
+          name: '{{ item }}'
+          state: present
+      with_items:
+          - git
+          - nodejs
+          - innosetup
+          - psexec
+    - name: Build Firelink with Inno setup
+      win_psexec:
+          command: '"C:\Program Files (x86)\Inno Setup 5\ISCC.exe" "C:\Users\user\Desktop\firelink_inno_setup.iss"'
+    # - name: Get source from repository
+    #   raw: git clone ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server C:\setup\src
+      # git:
+      #     repo: 'ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server'
+      #     dest: C:\setup\src
+          # version: release-0.22
+
+
+      

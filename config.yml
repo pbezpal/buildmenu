@@ -1,0 +1,10 @@
+app:
+  git:
+    branch: electron
+    url: git clone ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
+  name: "\u0420\u043E\u0441\u0427\u0430\u0442"
+  platforms:
+  - linux
+  - windows
+  - macos
+  version: 0.0.28
