@@ -7,9 +7,6 @@
       - index: 0
       # - appname: РосЧат
   tasks:
-      - name: Tag
-        debug:
-            var: tag
       # #########Перенёс в build.py################
       # - name: Build www dependencies
       #   shell: npm i
@@ -28,27 +25,30 @@
       #       path: '{{ local_src_dir }}/clients/demo/dist/resources/app'
       #       state: directory
       #   delegate_to: localhost
-      - name: Copy electron builder config
-        template:
-            src: ./resources/app/package.json.tpl
-            dest: '{{ local_src_dir }}/clients/demo/dist/resources/app/package.json'
-        delegate_to: localhost
-      - name: Copy www app files into electron app
-        copy:
-            src: '{{ local_src_dir }}/clients/demo/dist'
-            dest: '{{ local_src_dir }}/clients/demo/js/electron/'
-        delegate_to: localhost
-      - name: Copy electron package.json
-        template:
-            src: ./resources/app/package.json.tpl
-            dest: '{{ local_src_dir }}/clients/demo/js/electron/package.json'
-        delegate_to: localhost
-      - name: Build electron dependencies
-        shell: npm i
-        args:
-            chdir: '{{ local_src_dir }}/clients/demo/js/electron/'
-            executable: /bin/bash
-        delegate_to: localhost
+      # - name: Copy electron builder config
+      #   template:
+      #       src: ./resources/app/package.json.tpl
+      #       dest: '{{ local_src_dir }}/clients/demo/dist/resources/app/package.json'
+      #   delegate_to: localhost
+      # - name: Copy www app files into electron app
+      #   copy:
+      #       src: '{{ local_src_dir }}/clients/demo/dist'
+      #       dest: '{{ local_src_dir }}/clients/demo/js/electron/'
+      #   delegate_to: localhost
+      # - name: Copy electron package.json
+      #   template:
+      #       src: ./resources/app/package.json.tpl
+      #       dest: '{{ local_src_dir }}/clients/demo/js/electron/package.json'
+      #   delegate_to: localhost
+      # - name: Build electron dependencies
+      #   shell: npm i
+      #   args:
+      #       chdir: '{{ local_src_dir }}/clients/demo/js/electron/'
+      #       executable: /bin/bash
+      #   delegate_to: localhost
+      ################################################################
+      
+      ################################################################
       # - name: Rebuild modules
       #   shell: $(npm bin)/electron-rebuild
       #   args:
@@ -61,24 +61,28 @@
       #       dest: '{{ local_src_dir }}/clients/demo/js/electron/license.txt'
       #   delegate_to: localhost
     #electron-packager . electron-tutorial-app --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/icons/png/1024x1024.png --prune=true --out=release-builds
-      - name: Build electron app for Linux
-        shell: 'electron-packager . РосЧат --overwrite --asar=true --platform=linux --arch=x64 --icon=/home/apterion/develop/ansible/src/roschat/roschat5.png --prune=true --out=release-builds --electronVersion {{electron_version}}'
-        args:
-            chdir: '{{ local_src_dir }}/clients/demo/js/electron'
-            executable: /bin/bash
-        delegate_to: localhost
-      - name: Build electron app for Windows
-        shell: 'electron-packager . РосЧат --overwrite --platform win32 --arch x64 --icon /home/apterion/develop/ansible/src/roschat/roschat5.ico --out ./dst  --electronVersion {{electron_version}}'
-        args:
-            chdir: '{{ local_src_dir }}/clients/demo/js/electron'
-            executable: /bin/bash
-        delegate_to: localhost
-      - name: Build electron app for Mac OS
-        shell: 'electron-packager . --overwrite --platform=darwin --arch=x64 --icon ~/develop/ansible/src/roschat/roschat5.ico --prune=true --out=release-builds --electronVersion={{electron_version}} roschat'
-        args:
-            chdir: '{{ local_src_dir }}/clients/demo/js/electron'
-            executable: /bin/bash
-        delegate_to: localhost
+    ######### Перенёс в build.py ############################################
+      # - name: Build electron app for Linux
+      #   shell: 'electron-packager . РосЧат --overwrite --asar=true --platform=linux --arch=x64 --icon=/home/apterion/develop/ansible/src/roschat/roschat5.png --prune=true --out=release-builds --electronVersion {{electron_version}}'
+      #   args:
+      #       chdir: '{{ local_src_dir }}/clients/demo/js/electron'
+      #       executable: /bin/bash
+      #   delegate_to: localhost
+      # - name: Build electron app for Windows
+      #   shell: 'electron-packager . РосЧат --overwrite --platform win32 --arch x64 --icon /home/apterion/develop/ansible/src/roschat/roschat5.ico --out ./dst  --electronVersion {{electron_version}}'
+      #   args:
+      #       chdir: '{{ local_src_dir }}/clients/demo/js/electron'
+      #       executable: /bin/bash
+      #   delegate_to: localhost
+      # - name: Build electron app for Mac OS
+      #   shell: 'electron-packager . --overwrite --platform=darwin --arch=x64 --icon ~/develop/ansible/src/roschat/roschat5.ico --prune=true --out=release-builds --electronVersion={{electron_version}} roschat'
+      #   args:
+      #       chdir: '{{ local_src_dir }}/clients/demo/js/electron'
+      #       executable: /bin/bash
+      #   delegate_to: localhost
+      #####################################################################
+      
+      #####################################################################
       - name: Create folder
         win_file:
             path: '{{ win_work_dir }}\compile'

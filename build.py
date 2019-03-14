@@ -3,6 +3,7 @@ import sys
 import os
 import subprocess
 import yaml
+from jinja2 import Template
 
 if len(sys.argv) < 2:
    conf_file = './config.yml'
@@ -19,7 +20,9 @@ minor_version = prev_full_version.split('.')[1]
 cur_full_version = major_version+'.'+minor_version+'.'+cur_build_version
 
 cwd = os.getcwd()
-src_dir = "./git_sources"
+src_dir = os.getcwd()+"/git_sources"
+
+print("Начинаю сборку "+config['app']['name']+" v"+cur_full_version)
 
 def shell(command):
     p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
@@ -58,19 +61,30 @@ def prepareBuild(tag=""):
     else:
         tag = tag+'.'+cur_build_version
     config['app']['version'] = tag
-    with open(conf_file, 'w') as outfile:
-        yaml.dump(config, outfile, default_flow_style=False)
+    with open(conf_file, 'w') as of:
+        yaml.dump(config, of, default_flow_style=False)
     buildDeps(tag)
     
 def buildDeps(tag):
     shell("cd "+src_dir+"/clients/demo && yarn install && gulp")
-    shell("mkdir "+src_dir+"/clients/demo/dist/resources/app")
-
+    shell("rm -rf "+src_dir+"/clients/demo/dist/resources/app")
+    shell("mkdir -p "+src_dir+"/clients/demo/dist/resources/app")
+    # tpl = open('./resources/app/package.json.tpl').read()
+    template = Template(open('./resources/app/package.json.tpl').read())
+    package_json = template.render({'appname': config['app']['name'], 'tag': tag})
+    with open(src_dir+"/clients/demo/dist/resources/app/package.json", "w") as of:
+        of.write(package_json)
+    shell("cp -r "+src_dir+"/clients/demo/{dist,js/electron/dist}")
+    with open(src_dir+"/clients/demo/js/electron/package.json", "w") as of:
+        of.write(package_json)
+    shell("cd "+src_dir+"/clients/demo/js/electron/ && yarn install")
+    shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . РосЧат --overwrite --asar=true --platform=linux --arch=x64 --icon=/home/apterion/develop/ansible/src/roschat/roschat5.png --prune=true --out=release-builds --electronVersion "+electron_version)
+    shell("cd "+src_dir+"electron-packager . РосЧат --overwrite --platform win32 --arch x64 --icon /home/apterion/develop/ansible/src/roschat/roschat5.ico --out ./dst  --electronVersion "+electron_version)
+    shell("cd "+src_dir+"electron-packager . --overwrite --platform=darwin --arch=x64 --icon ~/develop/ansible/src/roschat/roschat5.ico --prune=true --out=release-builds --electronVersion="+electron_version+" roschat")
     build(tag)
 
 def build(tag):
-    
-    os.system('ansible-playbook build.yml -e \"local_src_dir='+src_dir+' electron_version='+electron_version+' tag='+tag+'"')
+    os.system('ansible-playbook build.yml -e \"local_src_dir='+src_dir+' electron_version='+electron_version+' appname='+config['app']['name']+' tag='+tag+'"')
 
 def setBranch(branch):
     os.chdir(src_dir)
@@ -101,7 +115,7 @@ def chooseAction(branch):
     if choose == 1:
         chooseTag(branch)
     elif choose == 2:
-        build()
+        prepareBuild()
     else:
         chooseAction(branch)
     
@@ -112,7 +126,7 @@ def chooseTag(branch):
     tag_num = int(input("Введите порядковый номер тега:"))
     if affirm(tags[tag_num-1]):
         setTag(tags[tag_num-1])
-        build(tags[tag_num-1])
+        prepareBuild(tags[tag_num-1])
     
 def chooseBranch():
     branches = getBranches()
@@ -124,12 +138,12 @@ def chooseBranch():
         if affirm(branch):
             setBranch(branch)
             # chooseAction(branch)
-            build()
+            prepareBuild()
         else:
             chooseBranch()
     else:
         setBranch(config['app']['git']['branch'])
-        build()
+        prepareBuild()
 
 getSources()
 chooseBranch()
