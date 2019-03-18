@@ -5,11 +5,11 @@
       dest: ~/build
       recursive: yes
 - name: Build DMG
-  command: '/usr/local/bin/node /usr/local/bin/electron-installer-dmg roschat-darwin-x64/roschat.app --overwrite RosChat-{{tag}}'
+  command: '/usr/local/bin/node /usr/local/bin/electron-installer-dmg {{appname}}-darwin-x64/{{appname}}.app --overwrite {{appname}}-{{tag}}'
   args:
       chdir: ~/build/darwin/
 - name: Fetch DMG
   fetch:
-      src: '~/build/darwin/RosChat-{{tag}}.dmg'
+      src: '~/build/darwin/{{appname}}-{{tag}}.dmg'
       dest: '{{local_src_dir}}/../setup/dmg/'
       flat: yes
