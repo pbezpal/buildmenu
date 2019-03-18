@@ -10,9 +10,8 @@ console.log(`Platform: ${process.platform}`);
 ipcMain.on('test', console.log);
 
 app.on('ready', () => {
-    // if (process.platform === 'windows') tray = new Tray(path.join(__dirname,'../img/roschat5.ico'));
-    // else tray = new Tray(path.join(__dirname,'./img/roschat5.png'));
-    // tray = new Tray(path.join(__dirname,'../img/roschat5.png')); // Linux
+    if (process.platform === 'linux') tray = new Tray(path.join(__dirname,'./img/roschat5.png'));
+    else tray = new Tray(path.join(__dirname,'../img/roschat5.ico'));
     // 
   const contextMenu = Menu.buildFromTemplate([
       { label: 'Выход', type: 'normal', click: () => process.exit(0) }

@@ -1,39 +1,15 @@
 ---
-- name: Mac OS builds
-  hosts: macos
-  # become: True
-  # vars:
-  #     - win_work_dir: C:\build\src\roschat
-  #     - index: 0
-  tasks:
-      - name: Mac OS builds
-        debug:
-            msg: "Mac OS builds"
-        # win_file:
-        #     path: '{{ win_work_dir }}\compile'
-        #     state: directory
-      # - name: Create folder
-      #   win_file:
-      #       path: '{{ win_work_dir }}\client'
-      #       state: directory
-      # - name: Export sources
-      #   win_copy:
-      #       src: '{{ local_src_dir }}/clients/demo/js/electron'
-      #       dest: '{{ win_work_dir }}\client'
-      # - name: Export license file
-      #   win_copy:
-      #       src: '{{ local_src_dir }}/clients/demo/js/electron/license.txt'
-      #       dest: '{{ win_work_dir }}\compile\license.txt'
-      # - name: Export Inno Setup script
-      #   template:
-      #       src: ./roschat_inno_setup.tpl
-      #       dest: '{{ win_work_dir }}\compile\roschat_inno_setup.iss'
-      # - name: Build RosChat installer by Inno setup
-      #   win_psexec:
-      #       command: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "{{ win_work_dir }}\compile\roschat_inno_setup.iss"'
-      # - name: Import setup file
-      #   fetch:
-      #       src: 'C:\inno_setup_files\RosChat setup.exe'
-      #       dest: './setup_files/RosChat setup-{{ tag }}.exe'
-      #       flat: true
-
+- name: Export source to MacOS
+  synchronize:
+      src: '{{local_src_dir}}/../darwin'
+      dest: ~/build
+      recursive: yes
+- name: Build DMG
+  command: '/usr/local/bin/node /usr/local/bin/electron-installer-dmg roschat-darwin-x64/roschat.app --overwrite RosChat-{{tag}}'
+  args:
+      chdir: ~/build/darwin/
+- name: Fetch DMG
+  fetch:
+      src: '~/build/darwin/RosChat-{{tag}}.dmg'
+      dest: '{{local_src_dir}}/../setup/dmg/'
+      flat: yes

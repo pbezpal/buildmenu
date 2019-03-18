@@ -78,13 +78,13 @@ def buildDeps(tag):
     with open(src_dir+"/clients/demo/js/electron/package.json", "w") as of:
         of.write(package_json)
     shell("cd "+src_dir+"/clients/demo/js/electron/ && yarn install")
-    shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . РосЧат --overwrite --asar=true --platform=linux --arch=x64 --icon=/home/apterion/develop/ansible/src/roschat/roschat5.png --prune=true --out=release-builds --electronVersion "+electron_version)
-    shell("cd "+src_dir+"electron-packager . РосЧат --overwrite --platform win32 --arch x64 --icon /home/apterion/develop/ansible/src/roschat/roschat5.ico --out ./dst  --electronVersion "+electron_version)
-    shell("cd "+src_dir+"electron-packager . --overwrite --platform=darwin --arch=x64 --icon ~/develop/ansible/src/roschat/roschat5.ico --prune=true --out=release-builds --electronVersion="+electron_version+" roschat")
+    shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . РосЧат --overwrite --asar --platform=linux --arch=x64 --icon=/home/apterion/develop/ansible/src/roschat/roschat5.png --prune=true --out="+src_dir+"/../amd64 --electronVersion "+electron_version)
+    shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . РосЧат --overwrite --platform win32 --arch x64 --icon /home/apterion/develop/ansible/src/roschat/roschat5.ico --out "+src_dir+"/../win32  --electronVersion "+electron_version)
+    shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . --overwrite --platform=darwin --arch=x64 --icon ~/develop/ansible/src/roschat/roschat5.ico --prune=true --out="+src_dir+"/../darwin --electronVersion="+electron_version+" roschat")
     build(tag)
 
 def build(tag):
-    os.system('ansible-playbook build.yml -e \"local_src_dir='+src_dir+' electron_version='+electron_version+' appname='+config['app']['name']+' tag='+tag+'"')
+    os.system('ansible-playbook build.yml -e \"deb='+str(config['app']['platforms']['deb'])+' rpm='+str(config['app']['platforms']['rpm'])+' windows='+str(config['app']['platforms']['windows'])+' macos='+str(config['app']['platforms']['macos'])+' local_src_dir='+src_dir+' electron_version='+electron_version+' appname='+config['app']['name']+' tag='+tag+'"')
 
 def setBranch(branch):
     os.chdir(src_dir)

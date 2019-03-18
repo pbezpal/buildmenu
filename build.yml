@@ -1,7 +1,21 @@
 ---
-- name: Build
-  hosts: setup
-- import_playbook: linux/deb/tasks.yml
-- import_playbook: linux/rpm/tasks.yml
-- import_playbook: windows/tasks.yml
-- import_playbook: macos/tasks.yml
+- name: Build on Mac OS
+  hosts: macos
+  tasks:
+      - include_tasks: macos/tasks.yml
+        when: macos
+- name: Build on *.deb
+  hosts: deb
+  tasks:
+      - include_tasks: linux/deb/tasks.yml
+        when: deb
+- name: Build on *.rpm
+  hosts: rpm
+  tasks:
+      - include_tasks: linux/rpm/tasks.yml
+        when: rpm
+- name: Building on Windows
+  hosts: windows
+  tasks:
+      - include_tasks: windows/tasks.yml
+        when: windows
