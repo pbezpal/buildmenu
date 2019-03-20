@@ -1,5 +1,9 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 import os
 import subprocess
 import yaml
@@ -25,7 +29,7 @@ src_dir = os.getcwd()+"/git_sources"
 print("Начинаю сборку "+config['app']['name']+" v"+cur_full_version)
 
 def shell(command):
-    p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(['/bin/bash -c "'+command+'"'], stdout=subprocess.PIPE, shell=True)
     return p.stdout.read()
 
 
@@ -80,11 +84,11 @@ def buildDeps(tag):
         of.write(package_json)
     shell("cd "+src_dir+"/clients/demo/js/electron/ && yarn install")
     if config['app']['platforms']['rpm'] or config['app']['platforms']['deb']:
-       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . "+config['app']['name']+" --overwrite --asar --platform=linux --arch=x64 --icon=/home/apterion/develop/web_server/clients/demo/js/electron/img/rch_logo1_32x32.png --prune=true --out="+src_dir+"/../amd64 --electronVersion "+electron_version)
+       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . "+config['app']['name']+" --overwrite --asar --platform=linux --arch=x64 --icon "+src_dir+"/clients/demo/js/electron/img/rch_logo1_32x32.png --prune=true --out="+src_dir+"/../amd64 --electronVersion "+electron_version)
     if config['app']['platforms']['windows']:
-       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . "+config['app']['name']+" --overwrite --platform win32 --arch x64 --icon /home/apterion/develop/ansible/src/roschat/roschat5.ico --out "+src_dir+"/../win32  --electronVersion "+electron_version)
+       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . "+config['app']['name']+" --overwrite --platform win32 --arch x64 --icon "+src_dir+"/clients/demo/js/electron/img/roschat5.ico --out "+src_dir+"/../win32  --electronVersion "+electron_version)
     if config['app']['platforms']['macos']:
-       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . --overwrite --platform=darwin --arch=x64 --icon ~/develop/ansible/src/roschat/roschat5.png.icns --prune=true --out="+src_dir+"/../darwin --electronVersion="+electron_version+" "+config['app']['name'])
+       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . --overwrite --platform=darwin --arch=x64 --icon "+src_dir+"/clients/demo/js/electron/img/roschat5.png.icns --prune=true --out="+src_dir+"/../darwin --electronVersion="+electron_version+" "+config['app']['name'])
     build(tag)
 
 def build(tag):

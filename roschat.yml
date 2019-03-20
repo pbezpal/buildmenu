@@ -8,4 +8,4 @@ app:
     macos: true
     rpm: false
     windows: false
-  version: 0.0.162
+  version: 0.0.170
