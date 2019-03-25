@@ -1,7 +1,7 @@
 {
-  "name": "roschat",
-  "version": "0.0.12",
-  "description": "",
+  "name": "RosChat",
+  "version": "0.0.181",
+  "description": "IM client",
   "main": "js/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

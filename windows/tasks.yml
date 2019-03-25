@@ -9,7 +9,7 @@
       state: directory
 - name: Export sources
   win_copy:
-      src: '{{ local_src_dir }}/clients/demo/js/electron'
+      src: '{{ local_src_dir }}/../win32'
       dest: '{{ win_work_dir }}\client'
 - name: Export license file
   win_copy:
@@ -25,6 +25,6 @@
 - name: Import setup file
   fetch:
       src: 'C:\inno_setup_files\RosChat setup.exe'
-      dest: './setup_files/RosChat setup-{{ tag }}.exe'
+      dest: '{{ local_src_dir }}/../setup/windows/RosChat setup-{{ tag }}.exe'
       flat: true
 

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+#reload(sys)
+#sys.setdefaultencoding("utf-8")
 import os
 import subprocess
 import yaml
@@ -92,7 +92,11 @@ def buildDeps(tag):
     build(tag)
 
 def build(tag):
-    os.system('ansible-playbook build.yml -e \"deb='+str(config['app']['platforms']['deb'])+' rpm='+str(config['app']['platforms']['rpm'])+' windows='+str(config['app']['platforms']['windows'])+' macos='+str(config['app']['platforms']['macos'])+' local_src_dir='+src_dir+' electron_version='+electron_version+' appname='+config['app']['name']+' tag='+tag+'"')
+   if config['app']['platforms']['rpm']:
+      shell("cd "+src_dir+"/../amd64 && electron-installer-redhat --src  РосЧат-linux-x64/ --dest ../setup/rpm/ --arch x86_64 --config ../config.json")
+   if config['app']['platforms']['deb']:
+      shell("cd "+src_dir+"/../amd64 && electron-installer-debian --src  РосЧат-linux-x64/ --dest ../setup/deb/ --arch amd64 --config ../config.json")
+   os.system('ansible-playbook build.yml -e \"deb=false rpm=false windows='+str(config['app']['platforms']['windows'])+' macos='+str(config['app']['platforms']['macos'])+' local_src_dir='+src_dir+' electron_version='+electron_version+' appname='+config['app']['name']+' tag='+tag+'"')
 
 def setBranch(branch):
     os.chdir(src_dir)
