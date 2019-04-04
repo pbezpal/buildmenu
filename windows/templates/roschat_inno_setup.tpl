@@ -59,8 +59,8 @@ Name: "{commondesktop}\{#Name}"; IconFilename: "{app}\roschat5.ico"; Filename: "
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Files]
-Source: "C:\build\src\roschat\client\electron\dst\РосЧат-win32-x64\РосЧат.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\build\src\roschat\client\electron\dst\РосЧат-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\build\src\roschat\client\win32\РосЧат-win32-x64\РосЧат.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\build\src\roschat\client\win32\РосЧат-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\build\src\roschat\client\electron\img\roschat5.ico"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Run]

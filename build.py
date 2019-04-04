@@ -68,12 +68,14 @@ def prepareBuild(tag=""):
     config['app']['name'] = config['app']['name']
     with open(conf_file, 'w') as of:
         yaml.dump(config, of, default_flow_style=False, allow_unicode=True)
+    # shell("mkdir "+src_dir+"/clients/demo/js/electron/config/ && cp ./roschat.yml "+src_dir+"/clients/demo/js/electron/config/default.yml")
     buildDeps(tag)
     
 def buildDeps(tag):
     shell("cd "+src_dir+"/clients/demo && yarn install && gulp")
     shell("rm -rf "+src_dir+"/clients/demo/dist/resources/app")
-    shell("mkdir -p "+src_dir+"/clients/demo/dist/resources/app")
+    shell("mkdir -p "+src_dir+"/clients/demo/dist/resources/app/config")
+    shell("cp ./roschat.yml "+src_dir+"/clients/demo/js/electron/config/default.yml")
     # tpl = open('./resources/app/package.json.tpl').read()
     template = Template(open('./resources/app/package.json.tpl').read())
     package_json = template.render({'appname': config['app']['name'], 'tag': tag})
@@ -84,18 +86,18 @@ def buildDeps(tag):
         of.write(package_json)
     shell("cd "+src_dir+"/clients/demo/js/electron/ && yarn install")
     if config['app']['platforms']['rpm'] or config['app']['platforms']['deb']:
-       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . "+config['app']['name']+" --overwrite --asar --platform=linux --arch=x64 --icon "+src_dir+"/clients/demo/js/electron/img/rch_logo1_32x32.png --prune=true --out="+src_dir+"/../amd64 --electronVersion "+electron_version)
+       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . RosChat --overwrite --platform=linux --arch=x64 --icon "+src_dir+"/clients/demo/js/electron/img/Roschat_color_32x32.png --prune=true --out="+src_dir+"/../amd64 --electronVersion "+electron_version)
     if config['app']['platforms']['windows']:
        shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . "+config['app']['name']+" --overwrite --platform win32 --arch x64 --icon "+src_dir+"/clients/demo/js/electron/img/roschat5.ico --out "+src_dir+"/../win32  --electronVersion "+electron_version)
     if config['app']['platforms']['macos']:
-       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . --overwrite --platform=darwin --arch=x64 --icon "+src_dir+"/clients/demo/js/electron/img/roschat5.png.icns --prune=true --out="+src_dir+"/../darwin --electronVersion="+electron_version+" "+config['app']['name'])
+       shell("cd "+src_dir+"/clients/demo/js/electron/ && electron-packager . --overwrite --platform=darwin --arch=x64 --icon "+src_dir+"/clients/demo/js/electron/img/Roschat_color_16x16.png.icns --prune=true --out="+src_dir+"/../darwin --electronVersion="+electron_version+" "+config['app']['name'])
     build(tag)
 
 def build(tag):
    if config['app']['platforms']['rpm']:
-      shell("cd "+src_dir+"/../amd64 && electron-installer-redhat --src  РосЧат-linux-x64/ --dest ../setup/rpm/ --arch x86_64 --config ../config.json")
+      shell("cd "+src_dir+"/../amd64 && electron-installer-redhat --src  RosChat-linux-x64/ --dest ../setup/rpm/ --arch x86_64 --config ../config.json")
    if config['app']['platforms']['deb']:
-      shell("cd "+src_dir+"/../amd64 && electron-installer-debian --src  РосЧат-linux-x64/ --dest ../setup/deb/ --arch amd64 --config ../config.json")
+      shell("cd "+src_dir+"/../amd64 && electron-installer-debian --src  RosChat-linux-x64/ --dest ../setup/deb/ --arch amd64 --config ../config.json")
    os.system('ansible-playbook build.yml -e \"deb=false rpm=false windows='+str(config['app']['platforms']['windows'])+' macos='+str(config['app']['platforms']['macos'])+' local_src_dir='+src_dir+' electron_version='+electron_version+' appname='+config['app']['name']+' tag='+tag+'"')
 
 def setBranch(branch):

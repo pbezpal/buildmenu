@@ -60,12 +60,16 @@ app.on('ready', () => {
     //     mainWindow = null;
     // });
     mainWindow.on('close', function (event) {
-        if(!app.isQuiting){
+        // if(!app.isQuiting){
+        //     event.preventDefault();
+        //     mainWindow.hide();
+        // }
+        if (mainWindow.isVisible()) {
             event.preventDefault();
             mainWindow.hide();
-        }
-
-        return false;
+            return false;
+        } 
+        // return false;
     });
 });
 
