@@ -13,31 +13,39 @@ from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
 
-def getSelfConfig():
-    t = tempfile.mkdtemp()
-    git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
-    shutil.move(os.path.join(t, 'project_list.yml'), 'config/')
-    shutil.rmtree(t)
-
-getSelfConfig()
-    
+parser = argparse.ArgumentParser()
 conf_file = 'config/project_list.yml'
 work_dir = os.getcwd()
 electron_version = '4.0.3'
-
-parser = argparse.ArgumentParser()
-
 src_dir = '/tmp/sources'
-config_git_url = 'ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/ormp_builds'
 jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.load(open(conf_file))
-projects = []
 username = 'shavlovskiy_sn'
 token = '110afafd6a5bbe698b1e69a37390daaafd'
 jenkins = Jenkins(jenkins_host, username=username, password=token)
-
+projects = []
 for project in config:
     projects.append(project['app']['name'])
+
+parser.add_argument('-n', '--name', nargs='*',  choices=projects, default=None)
+parser.add_argument('-b', '--branch', nargs='*', default=None)
+parser.add_argument('-t', '--tag', nargs='*', default=None)
+parser.add_argument('-nj', '--nojenkins', nargs='?', default=False)
+parser.add_argument('-nw', '--nowait', nargs='?', default=False)
+parser.add_argument('-l', '--list', nargs='?', default=False)
+
+namespace = parser.parse_args()
+
+def getSelfConfig():
+    config_git_url = 'ssh://10.10.199.35/opt/git/ormp_builds'
+    pathlib.Path('./config').mkdir(parents=True,exist_ok=True)
+    t = tempfile.mkdtemp()
+    git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
+    shutil.move(os.path.join(t, 'project_list.yml'), 'config/project_list.yml')
+    shutil.rmtree(t)
+
+getSelfConfig()
+
 
 def filterProjects(projects):
     if not projects == None:
@@ -45,13 +53,6 @@ def filterProjects(projects):
         return projects_config
     else:
         return config
-
-parser.add_argument('-n', '--name', nargs='*',  choices=projects, default=None)
-parser.add_argument('-b', '--branch', nargs='*', default=None)
-parser.add_argument('-t', '--tag', nargs='*', default=None)
-parser.add_argument('-j', '--jenkins', nargs='?', default=False)
-
-namespace = parser.parse_args()
 
 if not namespace.name == None:
     projects = filterProjects(namespace.name)
@@ -94,7 +95,7 @@ def getProjectTag(tag=None):
 
 def build(project):
 
-    if namespace.jenkins == None:
+    if namespace.nojenkins == False:
         print('Задача отправлена на Jenkins', jenkins_host)
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd']}
         # jenkins.build_job('build', parameters)
@@ -102,14 +103,16 @@ def build(project):
         job = jenkins.get_job('build')
         qi = job.invoke(build_params=parameters)
         if qi.is_queued() or qi.is_running():
-            print('Ожидание завершения сборки...')
             # qi.block_until_complete()
-            jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = ['build'], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
+            if namespace.nowait == False:
+                print('Ожидание завершения сборки...')
+                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = ['build'], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
         # build = qi.get_build()
         build = job.get_last_build()
         print(build)
     else:
-        os.system("build.py")
+        print('Локальная сборка (не Jenkins) ещё не реализована.')
+        #os.system("build.py")
 
 def getSources(project):
     shell("rm -rf "+src_dir)
@@ -149,13 +152,15 @@ def selectProject(project=None):
             i += 1
             print(str(i)+".", name)
         print("\r\n")
-        project_index = int(input("Выберите проект (введите номер): "))-1
-        project = config[project_index]['app']
-        makeProject(project)
+        if namespace.list == False:
+            project_index = int(input("Выберите проект (введите номер): "))-1
+            project = config[project_index]['app']
+            makeProject(project)
+        else:
+            exit(0)
 
 
 if namespace.name:
     selectProject(filterProjects(namespace.name[0])[0]['app'])
 else:
     selectProject()
-
