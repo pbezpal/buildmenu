@@ -13,8 +13,10 @@ from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
 
+script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
+
 parser = argparse.ArgumentParser()
-conf_file = 'config/project_list.yml'
+conf_file = script_dir+'/config/project_list.yml'
 work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
@@ -37,11 +39,11 @@ parser.add_argument('-l', '--list', nargs='?', default=False)
 namespace = parser.parse_args()
 
 def getSelfConfig():
-    config_git_url = 'ssh://10.10.199.35/opt/git/ormp_builds'
-    pathlib.Path('./config').mkdir(parents=True,exist_ok=True)
+    config_git_url = 'ssh://shavlovskiy_sn@10.10.199.35/opt/git/ormp_builds'
+    pathlib.Path(script_dir+'/config').mkdir(parents=True,exist_ok=True)
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
-    shutil.move(os.path.join(t, 'project_list.yml'), 'config/project_list.yml')
+    shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
     shutil.rmtree(t)
 
 getSelfConfig()

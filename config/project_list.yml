@@ -2,7 +2,7 @@
 - app:
         git:
             branch: electron
-            url: ssh://10.10.199.35/opt/git/firelink/web_server
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
             tag: no
         name: roschat-client
         productName: РосЧат
@@ -17,7 +17,7 @@
 - app:
         git:
             branch: master
-            url: ssh://10.10.199.35/opt/git/firelink/web_server
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
             tag: 0.1
         name: roschat-server
         productName: roschat-server
@@ -32,7 +32,7 @@
 - app:
         git:
             branch: master
-            url: ssh://10.10.199.35/opt/git/firelink/web_server
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
             tag: 0.1
         name: sip-server
         productName: sip-server
@@ -46,7 +46,7 @@
 - app:
         git:
             branch: master
-            url: ssh://10.10.199.35/opt/git/firelink/web_server
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
             tag: 0.1
         name: sma-server
         productName: sma-server
