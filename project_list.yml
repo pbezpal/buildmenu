@@ -1,0 +1,60 @@
+---
+- app:
+        git:
+            branch: electron
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
+            tag: no
+        name: roschat-client
+        productName: РосЧат
+        type: desktop
+        buildCmd: ./build.py RosChat
+        platforms:
+            deb: true
+            macos: true
+            rpm: true
+            windows: true
+        version: 0.0
+- app:
+        git:
+            branch: master
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
+            tag: 0.1
+        name: roschat-server
+        productName: roschat-server
+        type: server
+        buildCmd: sudo make all
+        platforms:
+            deb: false
+            macos: false
+            rpm: true
+            windows: false
+        version: 0.0
+- app:
+        git:
+            branch: master
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
+            tag: 0.1
+        name: sip-server
+        productName: sip-server
+        type: server
+        buildCmd: sudo make build
+        platforms:
+            deb: false
+            macos: false
+            rpm: true
+            windows: false
+- app:
+        git:
+            branch: master
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
+            tag: 0.1
+        name: sma-server
+        productName: sma-server
+        type: server
+        buildCmd: make sma
+        platforms:
+            deb: false
+            macos: false
+            rpm: true
+            windows: false
+        version: 0.0
