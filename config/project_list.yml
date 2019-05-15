@@ -51,7 +51,7 @@
         name: sma-server
         productName: sma-server
         type: server
-        buildCmd: rpmbuild 1.0.${BUILD_NUMBER}
+        buildCmd: rpmbuild 1.0.${BUILD_NUMBER} ${GIT_BRANCH} ${GIT_TAG}
         platforms:
             deb: false
             macos: false
