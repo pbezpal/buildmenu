@@ -22,7 +22,7 @@
         name: roschat-server
         productName: roschat-server
         type: server
-        buildCmd: sudo make all
+        buildCmd: make all
         platforms:
             deb: false
             macos: false
