@@ -85,10 +85,12 @@ def selectTag(project):
     for index, item in enumerate(tags):
         print(str(index+1)+": "+item)
     tag_number = int(input("Введите порядковый номер тега:"))
-    if tags[tag_number-1] == 'HEAD':
+    project['git']['tag'] = tags[tag_number-1]
+    if project['git']['tag'] == 'HEAD':
         selectBranch(project)
     else:
-        project['git']['branch'] = 'refs/tags/'+tags[tag_number-1]
+        # project['git']['branch'] = 'refs/tags/'+tags[tag_number-1]
+        project['git']['branch'] = 'refs/tags/'+project['git']['tag']
             
 def getProjectBranch(branch=None):
     for project in config:
@@ -104,7 +106,7 @@ def build(project):
 
     if namespace.nojenkins == False:
         print('Задача отправлена на Jenkins', jenkins_host)
-        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd']}
+        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'], "VERSION":project['git']['tag']}
         # jenkins.build_job('build', parameters)
         # job = jenkins['build']
         if not jenkins_helper.job_exists(project['name']):
@@ -170,7 +172,8 @@ def selectProject(project=None):
         else:
             exit(0)
 
-
+print(project)
+sys.exit(0)
 if namespace.name:
     selectProject(filterProjects(namespace.name[0])[0]['app'])
 else:
