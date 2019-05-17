@@ -32,6 +32,21 @@
 - app:
         git:
             branch: master
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/db_server
+            tag: 0.1
+        name: roschat-db
+        productName: roschat-db
+        type: server
+        buildCmd: make build
+        platforms:
+            deb: false
+            macos: false
+            rpm: true
+            windows: false
+        version: 0.0
+- app:
+        git:
+            branch: master
             url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
             tag: 0.1
         name: sip-server
