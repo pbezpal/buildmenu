@@ -153,7 +153,9 @@ def makeProject(project=None):
     elif not namespace.branch == None:
         project['git']['branch'] = namespace.branch
     elif not namespace.tag == None:
-        project['git']['branch'] = '/refs/tags/'+namespace.tag
+        project['git']['tag'] = namespace.tag[0]
+        project['git']['branch'] = 'refs/tags/'+project['git']['tag']
+        # project['git']['branch'] = 'refs/tags/'+namespace.tag[0]
     build(project)
     
 def selectProject(project=None):
