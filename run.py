@@ -6,7 +6,7 @@ import yaml,jinja2
 import pathlib
 import argparse
 import requests
-import jenkinsapi
+import jenkins,jenkinsapi
 import time
 import git
 from jenkinsapi.jenkins import Jenkins
@@ -17,6 +17,8 @@ script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
 
 parser = argparse.ArgumentParser()
 conf_file = script_dir+'/config/project_list.yml'
+jenkins_job_config = open(script_dir+'/config/jenkins_job.xml', 'r')
+jenkins_job = jenkins_job_config.read()
 work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
@@ -24,7 +26,9 @@ jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.load(open(conf_file))
 username = 'shavlovskiy_sn'
 token = '110afafd6a5bbe698b1e69a37390daaafd'
-jenkins = Jenkins(jenkins_host, username=username, password=token)
+jenkins_main = Jenkins(jenkins_host, username=username, password=token)
+jenkins_helper = jenkins.Jenkins(jenkins_host, username=username, password=token)
+
 projects = []
 for project in config:
     projects.append(project['app']['name'])
@@ -44,6 +48,7 @@ def getSelfConfig():
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
+    shutil.move(os.path.join(t, 'config/jenkins_job.xml'), os.path.join(script_dir,'config/jenkins_job.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -80,10 +85,12 @@ def selectTag(project):
     for index, item in enumerate(tags):
         print(str(index+1)+": "+item)
     tag_number = int(input("Введите порядковый номер тега:"))
-    if tags[tag_number-1] == 'HEAD':
+    project['git']['tag'] = tags[tag_number-1]
+    if project['git']['tag'] == 'HEAD':
         selectBranch(project)
     else:
-        project['git']['branch'] = 'refs/tags/'+tags[tag_number-1]
+        # project['git']['branch'] = 'refs/tags/'+tags[tag_number-1]
+        project['git']['branch'] = 'refs/tags/'+project['git']['tag']
             
 def getProjectBranch(branch=None):
     for project in config:
@@ -99,16 +106,20 @@ def build(project):
 
     if namespace.nojenkins == False:
         print('Задача отправлена на Jenkins', jenkins_host)
-        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd']}
+        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'], "VERSION":project['git']['tag']}
         # jenkins.build_job('build', parameters)
         # job = jenkins['build']
-        job = jenkins.get_job('build')
+        if not jenkins_helper.job_exists(project['name']):
+            jenkins_helper.create_job(project['name'], jenkins_job)
+        else:
+            jenkins_helper.reconfig_job(project['name'], jenkins_job)
+        job = jenkins_main.get_job(project['name'])
         qi = job.invoke(build_params=parameters)
         if qi.is_queued() or qi.is_running():
             # qi.block_until_complete()
             if namespace.nowait == False:
                 print('Ожидание завершения сборки...')
-                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = ['build'], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
+                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
         # build = qi.get_build()
         build = job.get_last_build()
         print(build)
@@ -142,7 +153,9 @@ def makeProject(project=None):
     elif not namespace.branch == None:
         project['git']['branch'] = namespace.branch
     elif not namespace.tag == None:
-        project['git']['branch'] = '/refs/tags/'+namespace.tag
+        project['git']['tag'] = namespace.tag[0]
+        project['git']['branch'] = 'refs/tags/'+project['git']['tag']
+        # project['git']['branch'] = 'refs/tags/'+namespace.tag[0]
     build(project)
     
 def selectProject(project=None):
@@ -160,7 +173,6 @@ def selectProject(project=None):
             makeProject(project)
         else:
             exit(0)
-
 
 if namespace.name:
     selectProject(filterProjects(namespace.name[0])[0]['app'])
