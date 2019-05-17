@@ -17,7 +17,8 @@ script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
 
 parser = argparse.ArgumentParser()
 conf_file = script_dir+'/config/project_list.yml'
-jenkins_job = script_dir+'/config/jenkins_job.xml'
+jenkins_job_config = open(script_dir+'/config/jenkins_job.xml', 'r')
+jenkins_job = jenkins_job_config.read()
 work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
@@ -106,7 +107,10 @@ def build(project):
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd']}
         # jenkins.build_job('build', parameters)
         # job = jenkins['build']
-        jenkins_helper.create_job(project['name'], jenkins_job)
+        if not jenkins_helper.job_exists(project['name']):
+            jenkins_helper.create_job(project['name'], jenkins_job)
+        else:
+            jenkins_helper.reconfig_job(project['name'], jenkins_job)
         job = jenkins_main.get_job(project['name'])
         qi = job.invoke(build_params=parameters)
         if qi.is_queued() or qi.is_running():
