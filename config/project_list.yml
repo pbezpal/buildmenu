@@ -63,8 +63,8 @@
         name: sma-server
         productName: sma-server
         type: server
-        # buildCmd: rpmbuild -bb -D \"prj_version ${VERSION}\" -D \"prj_build ${BUILD_NUMBER}\" -D \"src_dir ${WORKSPACE}\" rms.spec
-        buildCmd: rpmbuild -bb -D prj_version=${VERSION} -D prj_build=${BUILD_NUMBER} -D src_dir=${WORKSPACE} rms.spec
+        buildCmd: rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" rms.spec
+        # buildCmd: rpmbuild -bb -D prj_version=${VERSION} -D prj_build=${BUILD_NUMBER} -D src_dir=${WORKSPACE} rms.spec
         platforms:
             deb: false
             macos: false

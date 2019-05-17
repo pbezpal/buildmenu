@@ -59,7 +59,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>$BUILD_CMD</command>
+      <command>/bin/sh -c "$BUILD_CMD"</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
