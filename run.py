@@ -6,7 +6,7 @@ import yaml,jinja2
 import pathlib
 import argparse
 import requests
-import jenkinsapi
+import jenkinsapi,jenkins
 import time
 import git
 from jenkinsapi.jenkins import Jenkins
@@ -17,6 +17,7 @@ script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
 
 parser = argparse.ArgumentParser()
 conf_file = script_dir+'/config/project_list.yml'
+jenkins_job = script_dir+'/config/jenkins_job.xml'
 work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
@@ -24,7 +25,10 @@ jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.load(open(conf_file))
 username = 'shavlovskiy_sn'
 token = '110afafd6a5bbe698b1e69a37390daaafd'
-jenkins = Jenkins(jenkins_host, username=username, password=token)
+jenkins_main = Jenkins(jenkins_host, username=username, password=token)
+jenkins_helper = jenkins.Jenkins(jenkins_host, username=username, password=token)
+
+sys.exit(0)
 projects = []
 for project in config:
     projects.append(project['app']['name'])
@@ -44,6 +48,7 @@ def getSelfConfig():
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
+    shutil.move(os.path.join(t, 'config/jenkins_job.xml'), os.path.join(script_dir,'config/jenkins_job.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -102,7 +107,7 @@ def build(project):
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd']}
         # jenkins.build_job('build', parameters)
         # job = jenkins['build']
-        job = jenkins.get_job('build')
+        job = jenkins_main.get_job('build')
         qi = job.invoke(build_params=parameters)
         if qi.is_queued() or qi.is_running():
             # qi.block_until_complete()
