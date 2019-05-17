@@ -7,7 +7,7 @@
         name: roschat-client
         productName: РосЧат
         type: desktop
-        buildCmd: ./build.py RosChat
+        buildCmd: ./build.py RosChat prj_version=${VERSION} prj_build=${BUILD_NUMBER}
         platforms:
             deb: true
             macos: true
@@ -22,7 +22,7 @@
         name: roschat-server
         productName: roschat-server
         type: server
-        buildCmd: make all
+        buildCmd: make all prj_version=${VERSION} prj_build=${BUILD_NUMBER}
         platforms:
             deb: false
             macos: false
@@ -37,7 +37,7 @@
         name: roschat-db
         productName: roschat-db
         type: server
-        buildCmd: make build
+        buildCmd: make build prj_version=${VERSION} prj_build=${BUILD_NUMBER}
         platforms:
             deb: false
             macos: false
@@ -52,7 +52,7 @@
         name: sip-server
         productName: sip-server
         type: server
-        buildCmd: sudo make build
+        buildCmd: make build prj_version=${VERSION} prj_build=${BUILD_NUMBER}
         platforms:
             deb: false
             macos: false
@@ -81,7 +81,7 @@
         name: build-test
         productName: build-test
         type: server
-        buildCmd: echo ${VERSION}-${BUILD_NUMBER}
+        buildCmd: echo prj_version=${VERSION} prj_build=${BUILD_NUMBER}
         platforms:
             deb: false
             macos: false
