@@ -66,10 +66,25 @@
         name: sma-server
         productName: sma-server
         type: server
-        buildCmd: rpmbuild 1.0.${BUILD_NUMBER} ${GIT_BRANCH} ${GIT_TAG}
+        buildCmd: rpmbuild ${VERSION}-${BUILD_NUMBER}
         platforms:
             deb: false
             macos: false
             rpm: true
             windows: false
         version: 0.0
+- app:
+        git:
+            branch: master
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
+            tag: 0.3
+        name: build-test
+        productName: build-test
+        type: server
+        buildCmd: echo ${VERSION}-${BUILD_NUMBER}
+        platforms:
+            deb: false
+            macos: false
+            rpm: false
+            windows: false
+        version: 3.3
