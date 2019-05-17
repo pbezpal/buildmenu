@@ -6,7 +6,7 @@ import yaml,jinja2
 import pathlib
 import argparse
 import requests
-import jenkinsapi,jenkins
+import jenkins,jenkinsapi
 import time
 import git
 from jenkinsapi.jenkins import Jenkins
@@ -28,7 +28,6 @@ token = '110afafd6a5bbe698b1e69a37390daaafd'
 jenkins_main = Jenkins(jenkins_host, username=username, password=token)
 jenkins_helper = jenkins.Jenkins(jenkins_host, username=username, password=token)
 
-sys.exit(0)
 projects = []
 for project in config:
     projects.append(project['app']['name'])
@@ -107,13 +106,14 @@ def build(project):
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd']}
         # jenkins.build_job('build', parameters)
         # job = jenkins['build']
-        job = jenkins_main.get_job('build')
+        jenkins_helper.create_job(project['name'], jenkins_job)
+        job = jenkins_main.get_job(project['name'])
         qi = job.invoke(build_params=parameters)
         if qi.is_queued() or qi.is_running():
             # qi.block_until_complete()
             if namespace.nowait == False:
                 print('Ожидание завершения сборки...')
-                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = ['build'], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
+                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
         # build = qi.get_build()
         build = job.get_last_build()
         print(build)
