@@ -172,8 +172,6 @@ def selectProject(project=None):
         else:
             exit(0)
 
-print(project)
-sys.exit(0)
 if namespace.name:
     selectProject(filterProjects(namespace.name[0])[0]['app'])
 else:
