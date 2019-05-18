@@ -89,7 +89,6 @@ def selectTag(project):
     if project['git']['tag'] == 'HEAD':
         selectBranch(project)
     else:
-        # project['git']['branch'] = 'refs/tags/'+tags[tag_number-1]
         project['git']['branch'] = 'refs/tags/'+project['git']['tag']
             
 def getProjectBranch(branch=None):
@@ -106,9 +105,8 @@ def build(project):
 
     if namespace.nojenkins == False:
         print('Задача отправлена на Jenkins', jenkins_host)
-        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'], "VERSION":project['git']['tag']}
+        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'], "VERSION":project['git']['tag'], "TYPE":project['type']}
         # jenkins.build_job('build', parameters)
-        # job = jenkins['build']
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
         else:
@@ -119,10 +117,11 @@ def build(project):
             # qi.block_until_complete()
             if namespace.nowait == False:
                 print('Ожидание завершения сборки...')
-                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
-        # build = qi.get_build()
-        build = job.get_last_build()
-        print(build)
+                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=5, raise_on_timeout=False, username=username, password=token)
+        build_number = job.get_last_completed_buildnumber()
+        result = jenkins_helper.get_build_info(project['name'], build_number)
+        if result['result'] == 'FAILURE':
+            print(jenkins_helper.get_build_console_output(project['name'], build_number))
     else:
         print('Локальная сборка (не Jenkins) ещё не реализована.')
         #os.system("build.py")
@@ -155,7 +154,6 @@ def makeProject(project=None):
     elif not namespace.tag == None:
         project['git']['tag'] = namespace.tag[0]
         project['git']['branch'] = 'refs/tags/'+project['git']['tag']
-        # project['git']['branch'] = 'refs/tags/'+namespace.tag[0]
     build(project)
     
 def selectProject(project=None):
