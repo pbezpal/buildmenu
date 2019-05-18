@@ -122,6 +122,8 @@ def build(project):
         result = jenkins_helper.get_build_info(project['name'], build_number)
         if result['result'] == 'FAILURE':
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
+        else:
+            print(result['result'])
     else:
         print('Локальная сборка (не Jenkins) ещё не реализована.')
         #os.system("build.py")
