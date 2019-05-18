@@ -28,7 +28,13 @@
           <name>BUILD_CMD</name>
           <description></description>
           <defaultValue>make</defaultValue>
-          <trim>false</trim>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TYPE</name>
+          <description></description>
+          <defaultValue>server</defaultValue>
+          <trim>true</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -59,8 +65,23 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>/bin/sh -c "$BUILD_CMD"</command>
+      <command>/bin/sh -c &quot;$BUILD_CMD&quot;</command>
     </hudson.tasks.Shell>
+    <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
+      <disable>false</disable>
+      <serverInfo>builders~~build-debian~~10.10.199.31</serverInfo>
+      <groupName>builders</groupName>
+      <ip>10.10.199.31</ip>
+      <shell>mkdir -p /ftp/releases/RosChat/${TYPE}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</shell>
+    </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
+    <jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder plugin="ssh2easy@1.4">
+      <disable>false</disable>
+      <serverInfo>builders~~build-debian~~10.10.199.31</serverInfo>
+      <groupName>builders</groupName>
+      <ip>10.10.199.31</ip>
+      <localFilePath>${WORKSPACE}/result/*</localFilePath>
+      <remoteLocation>/ftp/releases/RosChat/${TYPE}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
+    </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
   </builders>
   <publishers/>
   <buildWrappers>
