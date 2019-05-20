@@ -8,6 +8,7 @@
         productName: РосЧат
         type: desktop
         buildCmd: python3 build.py ${VERSION} ${BUILD_NUMBER}
+        buildMachine: debian
         platforms:
             deb: true
             macos: true
@@ -22,6 +23,7 @@
         productName: roschat-server
         type: server
         buildCmd: make all prj_version=${VERSION} prj_build=${BUILD_NUMBER}
+        buildMachine: centos
         platforms:
             deb: false
             macos: false
@@ -36,6 +38,7 @@
         productName: roschat-db
         type: server
         buildCmd: make build prj_version=${VERSION} prj_build=${BUILD_NUMBER}
+        buildMachine: centos
         platforms:
             deb: false
             macos: false
@@ -50,6 +53,7 @@
         productName: roschat-sip
         type: server
         buildCmd: make build prj_version=${VERSION} prj_build=${BUILD_NUMBER}
+        buildMachine: centos
         platforms:
             deb: false
             macos: false
@@ -64,7 +68,7 @@
         productName: roschat-ms
         type: server
         buildCmd: rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" roschat-ms.spec
-        # buildCmd: rpmbuild -bb -D prj_version=${VERSION} -D prj_build=${BUILD_NUMBER} -D src_dir=${WORKSPACE} rms.spec
+        buildMachine: centos
         platforms:
             deb: false
             macos: false
