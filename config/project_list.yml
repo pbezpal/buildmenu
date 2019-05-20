@@ -7,7 +7,7 @@
         name: roschat-client
         productName: РосЧат
         type: desktop
-        buildCmd: ./build.py RosChat prj_version=${VERSION} prj_build=${BUILD_NUMBER}
+        buildCmd: python3 build.py RosChat prj_version=${VERSION} prj_build=${BUILD_NUMBER}
         platforms:
             deb: true
             macos: true
