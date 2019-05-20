@@ -6,7 +6,7 @@
             tag: 0.0.0
         name: roschat-client
         productName: РосЧат
-        type: desktop
+        type: client
         buildCmd: cd clients/demo && python3 build.py ${VERSION} ${BUILD_NUMBER} *giturl
         buildMachine: debian
         platforms:

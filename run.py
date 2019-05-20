@@ -119,7 +119,10 @@ def build(project):
             # qi.block_until_complete()
             if namespace.nowait == False:
                 print('Ожидание завершения сборки...')
-                jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=10, raise_on_timeout=False, username=username, password=token)
+                try:
+                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=10, raise_on_timeout=False, username=username, password=token)
+                except Exception:
+                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=10, raise_on_timeout=False, username=username, password=token)
         build_number = job.get_last_completed_buildnumber()
         result = jenkins_helper.get_build_info(project['name'], build_number)
         if result['result'] == 'FAILURE':
