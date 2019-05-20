@@ -60,7 +60,7 @@
             branch: master
             url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/managment-system-server
             tag: 0.0.0
-        name: sma-server
+        name: roschat-sma-server
         productName: sma-server
         type: server
         buildCmd: rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" rms.spec
@@ -69,18 +69,4 @@
             deb: false
             macos: false
             rpm: true
-            windows: false
-- app:
-        git:
-            branch: master
-            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/web_server
-            tag: 0.0.0
-        name: build-test
-        productName: build-test
-        type: server
-        buildCmd: echo prj_version=${VERSION} prj_build=${BUILD_NUMBER}
-        platforms:
-            deb: false
-            macos: false
-            rpm: false
             windows: false
