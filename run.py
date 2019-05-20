@@ -106,7 +106,7 @@ def build(project):
 
     if namespace.nojenkins == False:
         print('Задача отправлена на Jenkins', jenkins_host)
-        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'], "VERSION":re.sub(r'v.', '', project['git']['tag']), "TYPE":project['type']}
+        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['BUILD_MACHINE'], "VERSION":re.sub(r'v.', '', project['git']['tag']), "TYPE":project['type']}
         # jenkins.build_job('build', parameters)
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
