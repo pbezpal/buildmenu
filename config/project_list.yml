@@ -7,7 +7,7 @@
         name: roschat-client
         productName: РосЧат
         type: desktop
-        buildCmd: python3 build.py ${VERSION} ${BUILD_NUMBER}
+        buildCmd: cd clients/demo && python3 build.py ${VERSION} ${BUILD_NUMBER}
         buildMachine: debian
         platforms:
             deb: true
