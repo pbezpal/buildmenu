@@ -84,7 +84,7 @@
       <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
     </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
     <hudson.tasks.Shell>
-      <command>scp ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
+      <command>scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
