@@ -18,8 +18,6 @@ script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
 
 parser = argparse.ArgumentParser()
 conf_file = script_dir+'/config/project_list.yml'
-jenkins_job_config = open(script_dir+'/config/jenkins_job.xml', 'r')
-jenkins_job = jenkins_job_config.read()
 work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
@@ -49,7 +47,8 @@ def getSelfConfig():
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
-    shutil.move(os.path.join(t, 'config/jenkins_job.xml'), os.path.join(script_dir,'config/jenkins_job.xml'))
+    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
+    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -105,6 +104,8 @@ def getProjectTag(tag=None):
 def build(project):
 
     if namespace.nojenkins == False:
+        jenkins_job_config = open(script_dir+'/config/'+project['buildMachine']+'/jenkins_job.xml', 'r')
+        jenkins_job = jenkins_job_config.read()
         print('Задача отправлена на Jenkins', jenkins_host)
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'v.', '', project['git']['tag']), "TYPE":project['type']}
         # jenkins.build_job('build', parameters)
