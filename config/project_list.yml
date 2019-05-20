@@ -61,9 +61,9 @@
             url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/managment-system-server
             tag: 0.0.0
         name: roschat-ms
-        productName: sma-server
+        productName: roschat-ms
         type: server
-        buildCmd: rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" rms.spec
+        buildCmd: rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" roschat-ms.spec
         # buildCmd: rpmbuild -bb -D prj_version=${VERSION} -D prj_build=${BUILD_NUMBER} -D src_dir=${WORKSPACE} rms.spec
         platforms:
             deb: false
