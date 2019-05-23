@@ -70,14 +70,14 @@
     </hudson.tasks.Shell>
     <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
       <disable>false</disable>
-      <serverInfo>builders~~build-debian~~10.10.199.31</serverInfo>
+      <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
       <groupName>builders</groupName>
       <ip>10.10.199.31</ip>
       <shell>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</shell>
     </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
     <jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder plugin="ssh2easy@1.4">
       <disable>true</disable>
-      <serverInfo>builders~~build-debian~~10.10.199.31</serverInfo>
+      <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
       <groupName>builders</groupName>
       <ip>10.10.199.31</ip>
       <localFilePath>${WORKSPACE}/result/*</localFilePath>

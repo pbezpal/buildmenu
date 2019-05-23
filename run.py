@@ -14,6 +14,17 @@ from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
 
+# Requests patch for fix readtimeout exception
+import requests
+
+def request_patch(slf, *args, **kwargs):
+    # print("Fix called")
+    timeout = kwargs.pop('timeout', 100)
+    return slf.request_orig(*args, **kwargs, timeout=timeout)
+
+setattr(requests.sessions.Session, 'request_orig', requests.sessions.Session.request)
+requests.sessions.Session.request = request_patch
+
 script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
 
 parser = argparse.ArgumentParser()
@@ -24,7 +35,8 @@ src_dir = '/tmp/sources'
 jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.load(open(conf_file))
 username = 'shavlovskiy_sn'
-token = '110afafd6a5bbe698b1e69a37390daaafd'
+# token = '110afafd6a5bbe698b1e69a37390daaafd'
+token = '113e520c92adf331cee8df264326529ceb'
 jenkins_main = Jenkins(jenkins_host, username=username, password=token)
 jenkins_helper = jenkins.Jenkins(jenkins_host, username=username, password=token)
 
@@ -38,6 +50,7 @@ parser.add_argument('-t', '--tag', nargs='*', default=None)
 parser.add_argument('-nj', '--nojenkins', nargs='?', default=False)
 parser.add_argument('-nw', '--nowait', nargs='?', default=False)
 parser.add_argument('-l', '--list', nargs='?', default=False)
+# parser.add_argument('-bn', '--buildnumber', nargs='?', default=False)
 
 namespace = parser.parse_args()
 
@@ -107,13 +120,15 @@ def build(project):
         jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r')
         jenkins_job = jenkins_job_config.read()
         print('Задача отправлена на Jenkins', jenkins_host)
-        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'v.', '', project['git']['tag']), "TYPE":project['type']}
+        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'e', '', project['git']['tag']), "TYPE":project['type']}
         # jenkins.build_job('build', parameters)
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
         else:
             jenkins_helper.reconfig_job(project['name'], jenkins_job)
         job = jenkins_main.get_job(project['name'])
+        # if namespace.buildnumber:
+        #     jenkins_helper.set_next_build_number(project['name'], int(namespace.buildnumber))
         qi = job.invoke(build_params=parameters)
         if qi.is_queued() or qi.is_running():
             # qi.block_until_complete()
