@@ -91,7 +91,7 @@
       <serverInfo>macos~~macos~~10.10.38.175</serverInfo>
       <groupName>macos</groupName>
       <ip>10.10.38.175</ip>
-      <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg ~/darwin/roschat-darwin-x64/roschat.app --overwrite ~/darwin/roschat-${VERSION}-${BUILD_NUMBER}</shell>
+      <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg ~/darwin/roschat.app --overwrite ~/darwin/roschat-${VERSION}-${BUILD_NUMBER}</shell>
     </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
         <hudson.tasks.Shell>
       <command>scp -r developer@10.10.38.175:~/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/</command>
