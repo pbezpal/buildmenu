@@ -84,7 +84,7 @@
       <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
     </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
     <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/darwin/* developer@10.10.38.175:~/build/darwin/</command>
+      <command>scp -r ${WORKSPACE}/clients/demo/darwin/* developer@10.10.38.175:~/build/darwin/</command>
     </hudson.tasks.Shell>
     <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
       <disable>false</disable>
@@ -93,11 +93,11 @@
       <ip>10.10.38.175</ip>
       <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg roschat-darwin-x64/roschat.app --overwrite roschat-${VERSION}-${BUILD_NUMBER}</shell>
     </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
-    <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
+        <hudson.tasks.Shell>
+      <command>scp -r developer@10.10.38.175:~/build/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>scp -r developer@10.10.38.175:~/build/darwin/roscchat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/</command>
+      <command>scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
