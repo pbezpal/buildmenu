@@ -62,6 +62,7 @@ def getSelfConfig():
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
     shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job.xml'))
+    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_roschat-client.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_roschat-client.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -117,7 +118,10 @@ def getProjectTag(tag=None):
 def build(project):
 
     if namespace.nojenkins == False:
-        jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r')
+        if project['name'] == 'roschat-client':
+            jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r')
+        else:
+            jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r')
         jenkins_job = jenkins_job_config.read()
         print('Задача отправлена на Jenkins', jenkins_host)
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'e', '', project['git']['tag']), "TYPE":project['type']}
@@ -135,9 +139,9 @@ def build(project):
             if namespace.nowait == False:
                 print('Ожидание завершения сборки...')
                 try:
-                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=10, raise_on_timeout=False, username=username, password=token)
+                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
                 except Exception:
-                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=10, raise_on_timeout=False, username=username, password=token)
+                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=60, raise_on_timeout=False, username=username, password=token)
         build_number = job.get_last_completed_buildnumber()
         result = jenkins_helper.get_build_info(project['name'], build_number)
         if result['result'] == 'FAILURE':
