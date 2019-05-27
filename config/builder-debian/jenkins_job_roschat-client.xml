@@ -87,13 +87,20 @@
       <command>scp -r ${WORKSPACE}/clients/demo/darwin/* developer@10.10.38.175:~/darwin/</command>
     </hudson.tasks.Shell>
     <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
-      <disable>false</disable>
+      <disable>true</disable>
       <serverInfo>macos~~macos~~10.10.38.175</serverInfo>
       <groupName>macos</groupName>
       <ip>10.10.38.175</ip>
       <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg ~/darwin/roschat.app --overwrite ~/darwin/roschat-${VERSION}-${BUILD_NUMBER}</shell>
     </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
-        <hudson.tasks.Shell>
+    <jenkins.plugins.ssh2easy.gssh.GsshCommandBuilder plugin="ssh2easy@1.4">
+      <disable>false</disable>
+      <serverInfo>macos~~macos~~10.10.38.175</serverInfo>
+      <groupName>macos</groupName>
+      <ip>10.10.38.175</ip>
+      <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg ~/darwin/roschat.app --overwrite ~/darwin/roschat-${VERSION}-${BUILD_NUMBER}</shell>
+    </jenkins.plugins.ssh2easy.gssh.GsshCommandBuilder>
+    <hudson.tasks.Shell>
       <command>scp -r developer@10.10.38.175:~/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
