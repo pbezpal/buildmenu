@@ -139,9 +139,9 @@ def build(project):
             if namespace.nowait == False:
                 print('Ожидание завершения сборки...')
                 try:
-                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=30, raise_on_timeout=False, username=username, password=token)
-                except Exception:
                     jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=60, raise_on_timeout=False, username=username, password=token)
+                except Exception:
+                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=120, raise_on_timeout=False, username=username, password=token)
         build_number = job.get_last_completed_buildnumber()
         result = jenkins_helper.get_build_info(project['name'], build_number)
         if result['result'] == 'FAILURE':
