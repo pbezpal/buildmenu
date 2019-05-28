@@ -69,7 +69,7 @@
       <command>/bin/sh -c &quot;$BUILD_CMD&quot;</command>
     </hudson.tasks.Shell>
     <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
-      <disable>false</disable>
+      <disable>true</disable>
       <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
       <groupName>builders</groupName>
       <ip>10.10.199.31</ip>
@@ -107,7 +107,7 @@
       <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/roschat-${VERSION}-${BUILD_NUMBER}.dmg</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
+      <command>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/ && scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
