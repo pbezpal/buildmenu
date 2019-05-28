@@ -124,7 +124,7 @@ def build(project):
             jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r')
         jenkins_job = jenkins_job_config.read()
         print('Задача отправлена на Jenkins', jenkins_host)
-        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'e', '', project['git']['tag']), "TYPE":project['type']}
+        parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'e', '', project['git']['tag']), "TYPE":project['type'], "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M')}
         # jenkins.build_job('build', parameters)
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
