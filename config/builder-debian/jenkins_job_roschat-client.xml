@@ -113,10 +113,10 @@
       <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/roschat-${VERSION}-${BUILD_NUMBER}.dmg</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node clients/demo/js/electron/winstaller.js win32 x64 ${VERSION}.${BUILD_NUMBER}</command>
+      <command>electron-builder --win --x64 --ia32 --project ${WORKSPACE}/clients/demo/js/electron</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node clients/demo/js/electron/winstaller.js ia32 ia32 ${VERSION}.${BUILD_NUMBER}</command>
+      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}/</command>
