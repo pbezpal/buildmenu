@@ -90,7 +90,7 @@
       <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
     </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
     <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/clients/demo/darwin/* developer@10.10.38.175:/Users/developer/darwin/</command>
+      <command>scp -r ${WORKSPACE}/clients/demo/darwin/roschat-darwin-x64/* developer@10.10.38.175:/Users/developer/darwin/</command>
     </hudson.tasks.Shell>
     <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
       <disable>true</disable>
