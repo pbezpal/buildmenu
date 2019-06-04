@@ -113,7 +113,10 @@
       <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/roschat-${VERSION}-${BUILD_NUMBER}.dmg</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mkdir -p ${WORKSPACE}/result/windows/{ia32,x64}</command>
+      <command>mkdir -p ${WORKSPACE}/result/windows/x64</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>mkdir -p ${WORKSPACE}/result/windows/ia32</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>electron-builder --win --x64 --project ${WORKSPACE}/clients/demo/js/electron</command>
