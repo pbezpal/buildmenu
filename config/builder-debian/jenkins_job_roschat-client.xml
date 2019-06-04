@@ -107,10 +107,10 @@
       <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg darwin/roschat.app --overwrite darwin/roschat-${VERSION}-${BUILD_NUMBER}</shell>
     </jenkins.plugins.ssh2easy.gssh.GsshCommandBuilder>
     <hudson.tasks.Shell>
-      <command>mkdir -p ${WORKSPACE}/result/macos</command>
+      <command>mkdir -p ${WORKSPACE}/result/macos/x64</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/roschat-${VERSION}-${BUILD_NUMBER}.dmg</command>
+      <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/x64/roschat-${VERSION}.${BUILD_NUMBER}.dmg</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>mkdir -p ${WORKSPACE}/result/windows/x64</command>
