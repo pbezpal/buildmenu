@@ -122,19 +122,19 @@
       <command>electron-builder --win --x64 --project ${WORKSPACE}/clients/demo/js/electron</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/x64/</command>
+      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>electron-builder --win --ia32 --project ${WORKSPACE}/clients/demo/js/electron</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/ia32/</command>
+      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}/</command>
+      <command>test -d /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/ || mkdir /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}/</command>
+      <command>mv ${WORKSPACE}/result /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
