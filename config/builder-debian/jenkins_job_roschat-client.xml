@@ -89,8 +89,15 @@
       <localFilePath>${WORKSPACE}/result/*</localFilePath>
       <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
     </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
+    <jenkins.plugins.ssh2easy.gssh.GsshCommandBuilder plugin="ssh2easy@1.4">
+      <disable>false</disable>
+      <serverInfo>macos~~macos~~10.10.38.175</serverInfo>
+      <groupName>macos</groupName>
+      <ip>10.10.38.175</ip>
+      <shell>rm -rf /Users/developer/darwin/*</shell>
+    </jenkins.plugins.ssh2easy.gssh.GsshCommandBuilder>
     <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/clients/demo/darwin/* developer@10.10.38.175:/Users/developer/darwin/</command>
+      <command>scp -r ${WORKSPACE}/clients/demo/darwin/roschat-darwin-x64/* developer@10.10.38.175:/Users/developer/darwin/</command>
     </hudson.tasks.Shell>
     <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
       <disable>true</disable>
@@ -107,16 +114,34 @@
       <shell>/usr/local/bin/node /usr/local/bin/electron-installer-dmg darwin/roschat.app --overwrite darwin/roschat-${VERSION}-${BUILD_NUMBER}</shell>
     </jenkins.plugins.ssh2easy.gssh.GsshCommandBuilder>
     <hudson.tasks.Shell>
-      <command>mkdir -p ${WORKSPACE}/result/macos</command>
+      <command>mkdir -p ${WORKSPACE}/result/macos/x64</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/roschat-${VERSION}-${BUILD_NUMBER}.dmg</command>
+      <command>scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/x64/roschat-${VERSION}.${BUILD_NUMBER}.dmg</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}/</command>
+      <command>mkdir -p ${WORKSPACE}/result/windows/x64</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>scp -r ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}/</command>
+      <command>mkdir -p ${WORKSPACE}/result/windows/ia32</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>electron-builder --win --x64 --project ${WORKSPACE}/clients/demo/js/electron</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>electron-builder --win --ia32 --project ${WORKSPACE}/clients/demo/js/electron</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>test -d /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/ || mkdir /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>mv ${WORKSPACE}/result /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
