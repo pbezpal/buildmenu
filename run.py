@@ -33,7 +33,7 @@ work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
 jenkins_host = 'http://10.10.199.31:8080'
-config = yaml.load(open(conf_file))
+config = yaml.safe_load(open(conf_file))
 username = 'shavlovskiy_sn'
 # token = '110afafd6a5bbe698b1e69a37390daaafd'
 token = '113e520c92adf331cee8df264326529ceb'
@@ -101,7 +101,7 @@ def selectTag(project):
     tag_number = int(input("Введите порядковый номер тега:"))
     project['git']['tag'] = tags[tag_number-1]
     if project['git']['tag'] == 'HEAD':
-        selectBranch(project)
+        project['git']['branch'] = selectBranch(project)
     else:
         project['git']['branch'] = 'refs/tags/'+project['git']['tag']
             
@@ -125,6 +125,7 @@ def build(project):
         jenkins_job = jenkins_job_config.read()
         print('Задача отправлена на Jenkins', jenkins_host)
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'e', '', project['git']['tag']), "TYPE":project['type'], "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M')}
+        print(project['git']['branch'])
         # jenkins.build_job('build', parameters)
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
@@ -169,6 +170,7 @@ def selectBranch(project):
         print(str(index+1)+": "+item.replace("remotes/origin/",""))
     branch_index = int(input("Выберите ветку (введите номер): "))-1
     branch = branches[branch_index].replace("remotes/origin/","").replace('*', '').strip()
+    print(branch)
     return branch
 
 def makeProject(project=None):
