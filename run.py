@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 -s
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys,os,subprocess
 import re
@@ -124,7 +124,7 @@ def build(project):
         else:
             jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r')
         jenkins_job = jenkins_job_config.read()
-        print('Задача отправлена на Jenkins', jenkins_host)
+        print('Job sent to Jenkins', jenkins_host)
         parameters={"GIT_URL":project['git']['url'], "BRANCH":project['git']['branch'], "BUILD_CMD":project['buildCmd'],"BUILD_MACHINE": project['buildMachine'], "VERSION":re.sub(r'e', '', project['git']['tag']), "TYPE":project['type'], "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M')}
         print(project['git']['branch'])
         # jenkins.build_job('build', parameters)
@@ -139,7 +139,6 @@ def build(project):
         if qi.is_queued() or qi.is_running():
             # qi.block_until_complete()
             if namespace.nowait == False:
-                print('Ожидание завершения сборки...')
                 try:
                     jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=60, raise_on_timeout=False, username=username, password=token)
                 except Exception:
@@ -151,7 +150,7 @@ def build(project):
         else:
             print(result['result'])
     else:
-        print('Локальная сборка (не Jenkins) ещё не реализована.')
+        print('Local build not implemented yet')
         #os.system("build.py")
 
 def getSources(project):
@@ -172,7 +171,7 @@ def selectBranch(project):
     branches = getBranches()
     for index, item in enumerate(branches):
         print(str(index+1)+": "+item.replace("remotes/origin/",""))
-    branch_index = int(input("Выберите ветку (введите номер): "))-1
+    branch_index = int(input("Select branch (type number): "))-1
     branch = branches[branch_index].replace("remotes/origin/","").replace('*', '').strip()
     print(branch)
     return branch
@@ -192,13 +191,13 @@ def selectProject(project=None):
     if not project == None:
         makeProject(project)
     else:
-        print("\r\nСписок проектов:\r\n")
+        print("\r\nProjects list:\r\n")
         for i ,name in enumerate(projects):
             i += 1
             print(str(i)+".", name)
         print("\r\n")
         if namespace.list == False:
-            project_index = int(input("Выберите проект (введите номер): "))-1
+            project_index = int(input("Select project (type number): "))-1
             project = config[project_index]['app']
             makeProject(project)
         else:
