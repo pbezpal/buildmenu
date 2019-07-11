@@ -57,6 +57,7 @@ namespace = parser.parse_args()
 def getSelfConfig():
     config_git_url = 'ssh://shavlovskiy_sn@10.10.199.35/opt/git/ormp_builds'
     pathlib.Path(script_dir+'/config').mkdir(parents=True, exist_ok=True)
+    pathlib.Path(script_dir).chmod(0o777)
     pathlib.Path(script_dir+'/config').chmod(0o777)
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
@@ -157,6 +158,7 @@ def build(project):
 def getSources(project):
     shell("rm -rf "+src_dir)
     pathlib.Path(src_dir+"/"+project['name']).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(src_dir).chmod(0o777)
     pathlib.Path(src_dir+"/"+project['name']).chmod(0o777)
     shell("git clone "+project['git']['url']+" "+src_dir+"/"+project['name'])
     os.chdir(src_dir+"/"+project['name'])
