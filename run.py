@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 -s
 # -*- coding: utf-8 -*-
 import sys,os,subprocess
 import re
