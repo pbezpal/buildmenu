@@ -99,7 +99,7 @@ def selectTag(project):
     tags.append('HEAD')
     for index, item in enumerate(tags):
         print(str(index+1)+": "+item)
-    tag_number = int(input("Введите порядковый номер тега:"))
+    tag_number = int(input("Select tag (type number):"))
     project['git']['tag'] = tags[tag_number-1]
     if project['git']['tag'] == 'HEAD':
         project['git']['branch'] = selectBranch(project)
