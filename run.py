@@ -33,7 +33,7 @@ work_dir = os.getcwd()
 electron_version = '4.0.3'
 src_dir = '/tmp/sources'
 jenkins_host = 'http://10.10.199.31:8080'
-config = yaml.safe_load(open(conf_file))
+config = yaml.safe_load(open(conf_file, 'r', encoding='utf8'))
 username = 'shavlovskiy_sn'
 # token = '110afafd6a5bbe698b1e69a37390daaafd'
 token = '113e520c92adf331cee8df264326529ceb'
