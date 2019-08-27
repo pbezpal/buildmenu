@@ -74,3 +74,18 @@
             macos: false
             rpm: true
             windows: false
+- app:
+        git:
+            branch: master
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/managment-system-snmp
+            tag: 0.0.0
+        name: roschat-snmp
+        productName: roschat-snmp
+        type: server
+        buildCmd: rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" roschat-snmp.spec
+        buildMachine: centos
+        platforms:
+            deb: false
+            macos: false
+            rpm: true
+            windows: false
