@@ -77,7 +77,7 @@
 - app:
         git:
             branch: master
-            url: ssh://shavlovskiy_sn@10.10.199.35/opt/git/firelink/managment-system-snmp
+            url: ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/managment-system-snmp
             tag: 0.0.0
         name: roschat-snmp
         productName: roschat-snmp
