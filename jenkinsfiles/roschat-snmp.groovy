@@ -18,7 +18,7 @@ pipeline {
             // agent { label 'centos' }
             steps {
                 // git branch: '${BRANCH}', credentialsId: 'git_passwd', url: "${GIT_URL}"
-                git branch: '${BRANCH}', url: "${GIT_URL}"
+                git branch: "${BRANCH}", url: "${GIT_URL}"
             }
         }
         stage('Build') {
