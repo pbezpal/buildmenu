@@ -62,14 +62,14 @@
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.74">
     <script>pipeline {
-    agent none
+    agent {label &apos;centos&apos;}
     parameters {
         string name: &apos;BUILD_MACHINE&apos;, defaultValue: &apos;centos&apos;, description: &apos;Build machine&apos;, trim: true
-        string defaultValue: &apos;echo &quot;Build command not specified&quot;&apos;, description: &apos;&apos;, name: &apos;BUILD_CMD&apos;, trim: true
-        string defaultValue: &apos;&apos;, description: &apos;&apos;, name: &apos;GIT_URL&apos;, trim: true
-        string defaultValue: &apos;master&apos;, name: &apos;BRANCH&apos;, description: &apos;&apos;, trim: true
-        string defaultValue: &apos;0.0.0&apos;, name: &apos;VERSION&apos;, description: &apos;&apos;, trim: true
-        string defaultValue: &apos;server&apos;, name: &apos;TYPE&apos;, description: &apos;&apos;, trim: true
+        string name: &apos;BUILD_CMD&apos;, defaultValue: &apos;echo &quot;Build command not specified&quot;&apos;, description: &apos;&apos;, trim: true
+        string name: &apos;GIT_URL&apos;, defaultValue: &apos;&apos;, description: &apos;&apos;, trim: true
+        string name: &apos;BRANCH&apos;, defaultValue: &apos;master&apos;, description: &apos;&apos;, trim: true
+        string name: &apos;VERSION&apos;, defaultValue: &apos;0.0.0&apos;, description: &apos;&apos;, trim: true
+        string name: &apos;TYPE&apos;, defaultValue: &apos;server&apos;, description: &apos;&apos;, trim: true
     }
     stages {
         stage(&apos;Clean work directory&apos;) {
