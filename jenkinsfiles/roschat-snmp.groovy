@@ -2,7 +2,7 @@ pipeline {
     agent { label 'centos' }
     parameters {
         string defaultValue: 'rpmbuild -bb -D "prj_version ${VERSION}" -D "prj_build ${BUILD_NUMBER}" -D "src_dir ${WORKSPACE}" roschat-snmp.spec', description: '', name: 'BUILD_CMD', trim: true
-        string defaultValue: 'ssh://shavlovskiy_sn:123456@10.10.199.35/opt/git/firelink/managment-system-snmp', description: '', name: 'GIT_URL', trim: true
+        string defaultValue: 'ssh://10.10.199.35/opt/git/firelink/managment-system-snmp', description: '', name: 'GIT_URL', trim: true
         string defaultValue: 'master', name: 'BRANCH', description: '', trim: true
         string defaultValue: '0.0.0', name: 'VERSION', description: '', trim: true
         string defaultValue: 'server', name: 'TYPE', description: '', trim: true
