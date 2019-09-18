@@ -62,6 +62,7 @@
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.74">
     <script>pipeline {
+    agent none
     parameters {
         string name: &apos;BUILD_MACHINE&apos;, defaultValue: &apos;centos&apos;, description: &apos;Build machine&apos;, trim: true
         string defaultValue: &apos;echo &quot;Build command not specified&quot;&apos;, description: &apos;&apos;, name: &apos;BUILD_CMD&apos;, trim: true
