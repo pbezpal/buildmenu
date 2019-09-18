@@ -1,54 +1,33 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.34">
-  <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3.9"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.3.9">
-      <jobProperties/>
-      <triggers/>
-      <parameters>
-        <string>BRANCH</string>
-        <string>BUILD_CMD</string>
-        <string>BUILD_MACHINE</string>
-        <string>VERSION</string>
-        <string>GIT_URL</string>
-        <string>TYPE</string>
-      </parameters>
-      <options/>
-    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
-  </actions>
+<project>
+  <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>BUILD_MACHINE</name>
-          <description>Build machine</description>
-          <defaultValue>centos</defaultValue>
-          <trim>true</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>BUILD_CMD</name>
-          <description></description>
-          <defaultValue>echo &quot;Build command not specified&quot;</defaultValue>
-          <trim>true</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>GIT_URL</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>true</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description></description>
           <defaultValue>master</defaultValue>
-          <trim>true</trim>
+          <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>VERSION</name>
           <description></description>
           <defaultValue>0.0.0</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_URL</name>
+          <description></description>
+          <defaultValue>ssh://shavlovskiy_sn@10.10.199.35/opt/git/firelink/web_server</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_CMD</name>
+          <description></description>
+          <defaultValue>make</defaultValue>
           <trim>true</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -60,51 +39,62 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.74">
-    <script>pipeline {
-    agent none
-    parameters {
-        string name: &apos;BUILD_MACHINE&apos;, defaultValue: &apos;centos&apos;, description: &apos;Build machine&apos;, trim: true
-        string name: &apos;BUILD_CMD&apos;, defaultValue: &apos;echo &quot;Build command not specified&quot;&apos;, description: &apos;&apos;, trim: true
-        string name: &apos;GIT_URL&apos;, defaultValue: &apos;&apos;, description: &apos;&apos;, trim: true
-        string name: &apos;BRANCH&apos;, defaultValue: &apos;master&apos;, description: &apos;&apos;, trim: true
-        string name: &apos;VERSION&apos;, defaultValue: &apos;0.0.0&apos;, description: &apos;&apos;, trim: true
-        string name: &apos;TYPE&apos;, defaultValue: &apos;server&apos;, description: &apos;&apos;, trim: true
-    }
-    stages {
-        stage(&apos;Clean work directory&apos;) {
-            agent { label &quot;${BUILD_MACHINE}&quot; }
-            steps {
-                sh &apos;rm -rf *&apos;
-                sh &apos;test -d .git || rm -rf .git&apos;
-            }
-        }
-        stage(&apos;Get sources&apos;) {
-            agent { label &quot;${BUILD_MACHINE}&quot; }
-            steps {
-                git branch: &quot;${BRANCH}&quot;, credentialsId: &apos;git_passwd&apos;, url: &quot;${GIT_URL}&quot;
-            }
-        }
-        stage(&apos;Build&apos;) {
-            agent { label &quot;${BUILD_MACHINE}&quot; }
-            steps {
-                sh &quot;$BUILD_CMD&quot;
-            }
-        }
-        stage(&apos;Copy to storage&apos;) {
-            agent { label &quot;${BUILD_MACHINE}&quot; }
-            steps {
-                sh &quot;sshpass -p \&quot;34appterr21\&quot; ssh jenkins@10.10.199.31 \&quot;test -d /ftp/releases/RosChat/server/${JOB_NAME} || mkdir /ftp/releases/RosChat/server/${JOB_NAME}/\&quot;&quot;
-                sh &quot;sshpass -p \&quot;34appterr21\&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/\$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/&quot;
-            }
-        }
-    }
-}
-</script>
-    <sandbox>true</sandbox>
-  </definition>
-  <triggers/>
-  <quietPeriod>5</quietPeriod>
-  <authToken>110afafd6a5bbe698b1e69a37390daaafd</authToken>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.12.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>$GIT_URL</url>
+        <credentialsId>994140eb-7d3c-4895-bd08-49ff6455d062</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>$BRANCH</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <assignedNode>centos</assignedNode>
+  <canRoam>false</canRoam>
   <disabled>false</disabled>
-</flow-definition>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <authToken>110afafd6a5bbe698b1e69a37390daaafd</authToken>
+  <triggers/>
+  <concurrentBuild>true</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>/bin/sh -c &quot;$BUILD_CMD&quot;</command>
+    </hudson.tasks.Shell>
+    <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
+      <disable>true</disable>
+      <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
+      <groupName>builders</groupName>
+      <ip>10.10.199.31</ip>
+      <shell>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</shell>
+    </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
+    <jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder plugin="ssh2easy@1.4">
+      <disable>true</disable>
+      <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
+      <groupName>builders</groupName>
+      <ip>10.10.199.31</ip>
+      <localFilePath>${WORKSPACE}/result/*</localFilePath>
+      <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
+    </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
+    <hudson.tasks.Shell>
+      <command>sshpass -p &quot;34appterr21&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
+  </buildWrappers>
+</project>
