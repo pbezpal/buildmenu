@@ -8,6 +8,7 @@
       <parameters>
         <string>BRANCH</string>
         <string>BUILD_CMD</string>
+        <string>BUILD_MACHINE</string>
         <string>VERSION</string>
         <string>GIT_URL</string>
         <string>TYPE</string>
@@ -20,6 +21,12 @@
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_MACHINE</name>
+          <description>Build machine</description>
+          <defaultValue>centos</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CMD</name>
           <description></description>
@@ -55,7 +62,7 @@
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.74">
     <script>pipeline {
-    agent { label &quot;${BUILD_MACHINE}&quot; }
+    agent none
     // agent { label &apos;centos&apos; }
     parameters {
         string name: &apos;BUILD_MACHINE&apos;, defaultValue: &apos;centos&apos;, description: &apos;Build machine&apos;, trim: true
@@ -67,26 +74,26 @@
     }
     stages {
         stage(&apos;Clean work directory&apos;) {
-            // agent { label &apos;centos&apos; }
+            agent { label &quot;${BUILD_MACHINE}&quot; }
             steps {
                 sh &apos;rm -rf *&apos;
                 sh &apos;test -d .git || rm -rf .git&apos;
             }
         }
         stage(&apos;Get sources&apos;) {
-            // agent { label &apos;centos&apos; }
+            agent { label &quot;${BUILD_MACHINE}&quot; }
             steps {
                 git branch: &quot;${BRANCH}&quot;, credentialsId: &apos;git_passwd&apos;, url: &quot;${GIT_URL}&quot;
             }
         }
         stage(&apos;Build&apos;) {
-            // agent { label &apos;centos&apos; } 
+            agent { label &quot;${BUILD_MACHINE}&quot; } 
             steps {
                 sh &quot;$BUILD_CMD&quot;
             }
         }
         stage(&apos;Copy to storage&apos;) {
-            // agent { label &apos;centos&apos; }
+            agent { label &quot;${BUILD_MACHINE}&quot; }
             steps {
                 sh &quot;sshpass -p \&quot;34appterr21\&quot; ssh jenkins@10.10.199.31 \&quot;test -d /ftp/releases/RosChat/server/${JOB_NAME} || mkdir /ftp/releases/RosChat/server/${JOB_NAME}/\&quot;&quot;
                 sh &quot;sshpass -p \&quot;34appterr21\&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/\$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/&quot;
