@@ -12,6 +12,7 @@
         <string>VERSION</string>
         <string>GIT_URL</string>
         <string>TYPE</string>
+        <string>PROJECT_NAME</string>
       </parameters>
       <options/>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
@@ -21,6 +22,12 @@
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>PROJECT_NAME</name>
+          <description>Project name</description>
+          <defaultValue>roschat-snmp</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_MACHINE</name>
           <description>Build machine</description>
