@@ -118,12 +118,12 @@ def getProjectTag(tag=None):
 
 def build(project):
     if namespace.nojenkins == False:
-        # if project['name'] == 'roschat-client':
-        #     jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r')
-        # else:
-        #     jenkins_job_config = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r')
-        jenkins_job_config = open(script_dir+'/config/pipeline.xml', 'r')
-        jenkins_job = jenkins_job_config.read()
+        if project['name'] == 'roschat-client':
+            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r').read()
+        else:
+            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r').read()
+        # jenkins_job_config = open(script_dir+'/config/pipeline.xml', 'r')
+        # jenkins_job = jenkins_job_config.read()
         print('Job sent to Jenkins', jenkins_host)
         parameters={
             "PROJECT_NAME": project['name'],
