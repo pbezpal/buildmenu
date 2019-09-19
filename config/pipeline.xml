@@ -97,7 +97,7 @@
             agent { label &quot;${BUILD_MACHINE}&quot; }
             steps {
                 sh &quot;sshpass -p \&quot;34appterr21\&quot; ssh jenkins@10.10.199.31 \&quot;test -d /ftp/releases/RosChat/${TYPE}/${PROJECT_NAME} || mkdir -p /ftp/releases/RosChat/${TYPE}/${PROJECT_NAME}/\&quot;&quot;
-                sh &quot;sshpass -p \&quot;34pterr21\&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${PROJECT_NAME}/\$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/&quot;
+                sh &quot;sshpass -p \&quot;34appterr21\&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${PROJECT_NAME}/\$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/&quot;
             }
         }
     }
