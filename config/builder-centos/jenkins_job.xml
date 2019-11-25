@@ -84,6 +84,10 @@
       <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
     </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
     <hudson.tasks.Shell>
+      <command>rpm2cpio ${WORKSPACE}/result/roschat-web-client-${VERSION}-${BUILD_NUMBER}.rpm | cpio -idmv
+      </command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
       <command>sshpass -p &quot;34appterr21&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
     </hudson.tasks.Shell>
   </builders>

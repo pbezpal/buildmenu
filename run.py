@@ -3,7 +3,8 @@
 import sys,os,subprocess
 import re
 import tempfile,shutil
-import yaml,jinja2
+import jinja2
+import yaml
 import pathlib
 import argparse
 import requests
