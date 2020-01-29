@@ -143,6 +143,9 @@ def build(project):
         }
         print(project['git']['branch'])
         # jenkins.build_job('build', parameters)
+        if project['name'] != 'roschat-server':
+            shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123")
+            shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
         else:
