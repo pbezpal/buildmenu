@@ -11,6 +11,7 @@ import requests
 import jenkins,jenkinsapi
 import time
 import git
+import spur
 from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
