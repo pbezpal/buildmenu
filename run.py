@@ -35,6 +35,7 @@ electron_version = '4.0.3'
 src_dir = '/tmp/sources'
 jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.safe_load(open(conf_file, 'r', encoding='utf8'))
+#username = 'bezpalko_p'
 username = 'shavlovskiy_sn'
 # token = '110afafd6a5bbe698b1e69a37390daaafd'
 token = '113e520c92adf331cee8df264326529ceb'
@@ -61,7 +62,7 @@ def getSelfConfig():
     pathlib.Path(script_dir+'/config').mkdir(parents=True, exist_ok=True)
     pathlib.Path(script_dir+'/config').chmod(0o777)
     t = tempfile.mkdtemp()
-    git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
+#    git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job_test.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_test.xml'))
@@ -94,7 +95,7 @@ def getProjectUrl(name=None):
 def getTags():
     tags = shell("git tag ").decode("utf8").split("\n")
     return tags
-            
+
 def selectTag(project):
     tags = getTags()
     if not tags[len(tags)-1]:
@@ -108,7 +109,7 @@ def selectTag(project):
         project['git']['branch'] = selectBranch(project)
     else:
         project['git']['branch'] = 'refs/tags/'+project['git']['tag']
-            
+
 def getProjectBranch(branch=None):
     for project in config:
         if project['app']['name'] == branch:
@@ -163,6 +164,8 @@ def build(project):
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
+            if project['name'] != 'roschat-client':
+                jenkins_helper.build_job("roschat-server_docker_2")
     else:
         print('Local build not implemented yet')
         #os.system("build.py")
@@ -175,7 +178,7 @@ def getSources(project):
     shell("git clone "+project['git']['url']+" "+src_dir+"/"+project['name'])
     os.chdir(src_dir+"/"+project['name'])
     return
-            
+
 def getBranches():
     branches = shell("git branch -a").decode("utf8").split("\n")
     branches.pop()
@@ -200,7 +203,7 @@ def makeProject(project=None):
         project['git']['tag'] = namespace.tag[0]
         project['git']['branch'] = 'refs/tags/'+project['git']['tag']
     build(project)
-    
+
 def selectProject(project=None):
     if not project == None:
         makeProject(project)
