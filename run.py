@@ -122,6 +122,9 @@ def getProjectTag(tag=None):
 
 def build(project):
     if namespace.nojenkins == False:
+        if project['name'] == 'roschat-server':
+            shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123")
+            shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
         if project['name'] == 'roschat-client':
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r').read()
         elif namespace.test:
@@ -164,9 +167,6 @@ def build(project):
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
-            if project['name'] == 'roschat-server':
-                shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123")
-                shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
             if project['name'] != 'roschat-client':
                 jenkins_helper.build_job("roschat-server_docker")
     else:
