@@ -62,7 +62,7 @@ def getSelfConfig():
     pathlib.Path(script_dir+'/config').mkdir(parents=True, exist_ok=True)
     pathlib.Path(script_dir+'/config').chmod(0o777)
     t = tempfile.mkdtemp()
-#    git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
+    git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job_test.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_test.xml'))
