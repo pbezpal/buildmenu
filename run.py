@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys,os,subprocess
+import os
 import re
 import tempfile,shutil
 import jinja2
@@ -11,11 +12,17 @@ import requests
 import jenkins,jenkinsapi
 import time
 import git
-import spur
 from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
 
+try:
+    import spur
+except ImportError:
+    print('Библиотека spur не установлена, устанавливаю...')
+    os.system('pip3 install spur')
+
+import spur
 # Requests patch for fix readtimeout exception
 import requests
 
@@ -124,7 +131,7 @@ def getProjectTag(tag=None):
 def build(project):
     if namespace.nojenkins == False:
         if project['name'] == 'roschat-server':
-            shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123")
+            shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123",missing_host_key=spur.ssh.MissingHostKey.accept)
             shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
         if project['name'] == 'roschat-client':
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r').read()
