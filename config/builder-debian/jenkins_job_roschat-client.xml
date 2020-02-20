@@ -132,13 +132,19 @@
       <command>electron-builder --win --x64 --project ${WORKSPACE}/clients/demo/js/electron</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe</command>
+      <command>osslsigncode sign -pkcs12 /var/opt/n1.pfx -pass V090807It -h sha2 -t http://timestamp.comodoca.com/authenticode -in ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe -out ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>electron-builder --win --ia32 --project ${WORKSPACE}/clients/demo/js/electron</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mv ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe</command>
+      <command>osslsigncode sign -pkcs12 /var/opt/n1.pfx -pass V090807It -h sha2 -t http://timestamp.comodoca.com/authenticode -in ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe -out ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>test -d /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/ || mkdir /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/</command>
