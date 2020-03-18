@@ -47,7 +47,7 @@ electron_version = '4.0.3'
 src_dir = '/tmp/sources'
 jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.safe_load(open(conf_file, 'r', encoding='utf8'))
-config_users = yaml.safe_load(open("./users.yml", 'r', encoding='utf8'))
+config_users = yaml.safe_load(open("./config/users.yml", 'r', encoding='utf8'))
 parser_user = argparse.ArgumentParser()
 
 users = []
