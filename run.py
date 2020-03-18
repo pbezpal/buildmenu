@@ -8,6 +8,8 @@ import jinja2
 import yaml
 import pathlib
 import argparse
+import hashlib
+import getpass
 import requests
 import jenkins,jenkinsapi
 import time
@@ -36,6 +38,8 @@ requests.sessions.Session.request = request_patch
 
 script_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
 
+
+
 parser = argparse.ArgumentParser()
 conf_file = script_dir+'/config/project_list.yml'
 work_dir = os.getcwd()
@@ -43,10 +47,66 @@ electron_version = '4.0.3'
 src_dir = '/tmp/sources'
 jenkins_host = 'http://10.10.199.31:8080'
 config = yaml.safe_load(open(conf_file, 'r', encoding='utf8'))
-#username = 'bezpalko_p'
-username = 'shavlovskiy_sn'
-# token = '110afafd6a5bbe698b1e69a37390daaafd'
-token = '113e520c92adf331cee8df264326529ceb'
+config_users = yaml.safe_load(open("./users.yml", 'r', encoding='utf8'))
+parser_user = argparse.ArgumentParser()
+
+users = []
+for user in config_users:
+    users.append(user['user']['name'])
+
+parser_user.add_argument('-n', '--name', nargs='*',  choices=users, default=None)
+parser_user.add_argument('-u', '--username', nargs='*', default=None)
+parser_user.add_argument('-p', '--passwird', nargs='*', default=None)
+parser_user.add_argument('-t', '--token', nargs='*', default=None)
+parser_user.add_argument('-l', '--list', nargs='?', default=False)
+
+nameuser = parser_user.parse_args()
+
+def filterUsers(users):
+    if not users == None:
+        users_config = list(filter(lambda x: x['user']['name'] in users, config_users))
+        return users_config
+    else:
+        return config_users
+
+if not nameuser.name == None:
+    users = filterUsers(nameuser.name)
+
+def userSelected(user=None):
+    password=hashlib.md5(getpass.getpass("Enter password: ").encode("utf-8")).hexdigest()
+    if(password == user['password']):
+        global username
+        username = user['username']
+        global token
+        token = user['token'][::-1]
+    else:
+        print("Wrong password")
+        exit(0)
+
+
+def selectUsers(user=None):
+    while True:
+        print("\r\nList users:\r\n")
+        for index ,name in enumerate(users):
+            print(str(index+1)+".", name)
+        print("\nq: Quit")
+        print("\r\n")
+        if nameuser.list == False:
+            user_index = input("Select user (type number): ")
+            if user_index.isnumeric():
+                user_index = int(user_index)-1
+                if user_index == 1 or user_index <= index:
+                    user = config_users[user_index]['user']
+                    userSelected(user)
+                    break
+            elif user_index == 'q':
+                exit(0)
+
+if nameuser.name:
+    selectUsers(filterUsers(nameuser.name[0])[0]['user'])
+else:
+    selectUsers()
+
 jenkins_main = Jenkins(jenkins_host, username=username, password=token)
 jenkins_helper = jenkins.Jenkins(jenkins_host, username=username, password=token)
 
@@ -61,7 +121,6 @@ parser.add_argument('-nj', '--nojenkins', nargs='?', default=False)
 parser.add_argument('-nw', '--nowait', nargs='?', default=False)
 parser.add_argument('-l', '--list', nargs='?', default=False)
 parser.add_argument('-T', '--test', nargs='?', default=False)
-# parser.add_argument('-bn', '--buildnumber', nargs='?', default=False)
 
 namespace = parser.parse_args()
 
@@ -109,14 +168,22 @@ def selectTag(project):
     if not tags[len(tags)-1]:
         tags.pop()
     tags.append('HEAD')
-    for index, item in enumerate(tags):
-        print(str(index+1)+": "+item)
-    tag_number = int(input("Select tag (type number):"))
-    project['git']['tag'] = tags[tag_number-1]
-    if project['git']['tag'] == 'HEAD':
-        project['git']['branch'] = selectBranch(project)
-    else:
-        project['git']['branch'] = 'refs/tags/'+project['git']['tag']
+    while True:
+        for index, item in enumerate(tags):
+            print(str(index+1)+": "+item)
+        print("\nq: Quit")
+        tag_number = input("Select tag (type number): ")
+        if tag_number.isnumeric():
+            tag_number = int(tag_number)
+            if tag_number == 1 or tag_number <= index:
+                project['git']['tag'] = tags[tag_number-1]
+                if project['git']['tag'] == 'HEAD':
+                    project['git']['branch'] = selectBranch(project)
+                else:
+                    project['git']['branch'] = 'refs/tags/'+project['git']['tag']
+                break
+        elif tag_number == 'q':
+            exit(0)
 
 def getProjectBranch(branch=None):
     for project in config:
@@ -175,7 +242,7 @@ def build(project):
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
-            if project['name'] != 'roschat-client':
+            if not (project['name'] == 'roschat-client'):
                 jenkins_helper.build_job("roschat-server_docker")
     else:
         print('Local build not implemented yet')
@@ -197,12 +264,19 @@ def getBranches():
 
 def selectBranch(project):
     branches = getBranches()
-    for index, item in enumerate(branches):
-        print(str(index+1)+": "+item.replace("remotes/origin/",""))
-    branch_index = int(input("Select branch (type number): "))-1
-    branch = branches[branch_index].replace("remotes/origin/","").replace('*', '').strip()
-    print(branch)
-    return branch
+    while True:
+        for index, item in enumerate(branches):
+            print(str(index+1)+": "+item.replace("remotes/origin/",""))
+        print("\nq: Quit")
+        branch_index = input("Select branch (type number): ")
+        if branch_index.isnumeric():
+            branch_index = int(branch_index)-1
+            if branch_index == 1 or branch_index <= index:
+                branch = branches[branch_index].replace("remotes/origin/","").replace('*', '').strip()
+                print(branch)
+                return branch
+        elif branch_index == 'q':
+            exit(0)
 
 def makeProject(project=None):
     if namespace.branch == None and namespace.tag == None:
@@ -219,17 +293,22 @@ def selectProject(project=None):
     if not project == None:
         makeProject(project)
     else:
-        print("\r\nProjects list:\r\n")
-        for i ,name in enumerate(projects):
-            i += 1
-            print(str(i)+".", name)
-        print("\r\n")
-        if namespace.list == False:
-            project_index = int(input("Select project (type number): "))-1
-            project = config[project_index]['app']
-            makeProject(project)
-        else:
-            exit(0)
+        while True:
+            print("\r\nProjects list:\r\n")
+            for i ,name in enumerate(projects):
+                print(str(i+1)+".", name)
+            print("\nq: Quit")
+            print("\r\n")
+            if namespace.list == False:
+                project_index = input("Select project (type number): ")
+                if project_index.isnumeric():
+                    project_index = int(project_index)-1
+                    if project_index == 1 or project_index <= i:
+                        project = config[project_index]['app']
+                        makeProject(project)
+                        break
+                elif project_index == 'q':
+                    exit(0)
 
 if namespace.name:
     selectProject(filterProjects(namespace.name[0])[0]['app'])

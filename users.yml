@@ -1,0 +1,31 @@
+---
+- user:
+     name: Марк Фомин
+     username: mark
+     password: 8f2a295580b85286fc69968c66aad498
+     token: bda749dcd796cc3b54d0d9dbb593896711
+- user:
+     name: Алексей Романов
+     username: romanov_au
+     password: 1b29e9333573e51da5dcb79bdd6d2cc3
+     token: 1e76276c72863503b3efb9dfb17d6f5f11
+- user:
+     name: Павел Безпалько
+     username: bezpalko_p
+     password: 53ebc5fe04162fef54225bb2142736c5
+     token: b2c91073fec10f7efc7dae687670b16011
+- user:
+     name: Павел Чернышев
+     username: pavel.chernyshevd
+     password: 9047ad2976db83640655b763bfafdeb8
+     token: a33cb051f105e00d3f3cabd284dfe40b11
+- user:
+     name: Александ Кондратьев
+     username: kondratiev_as
+     password: 299b5362b767b4b9c89bf06c445db2dc
+     token: a9e9c739617d0bc7cd5787a3f4a833ac11
+- user:
+     name: Клешнев Антон
+     username: kleshnev_a
+     password: ee4817e26dc880b93d65b9fa8b8c07bb
+     token: 69e9333ce487bf5a3939df241628746c11
