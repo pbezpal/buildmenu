@@ -262,8 +262,8 @@ def build(project):
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
-            if not (project['name'] == 'roschat-client'):
-                jenkins_helper.build_job("roschat-server_docker")
+            #if not (project['name'] == 'roschat-client'):
+            #    jenkins_helper.build_job("roschat-server_docker")
     else:
         print('Local build not implemented yet')
         #os.system("build.py")
