@@ -107,10 +107,10 @@ pipeline{
           is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;Can&apos;t build linux client&quot;)
         }
       }
-      stage(&quot;Rsync rpm on ftp&quot;){
+      stage(&quot;Cleaning build directory on macos&quot;){
         agent { label &apos;macos&apos; }
         steps{
-          echo &quot;========== Clear build directory on macos ==========&quot;
+          echo &quot;========== Cleaning build directory on macos ==========&quot;
           script{
             is_result_shell_build(&quot;rm -rf /Users/developer/darwin/*&quot;,&quot;Can&apos;t clear build directory on macos&quot;)
           }
