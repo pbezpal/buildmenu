@@ -116,9 +116,9 @@ pipeline{
         steps{
           echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server ==========&quot;
           is_result_shell_build(&quot;ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          //is_result_shell_build(&quot;rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms&quot;,&quot;Can&apos;t remove old version snmp&quot;)
+          is_result_shell_build(&quot;rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms&quot;,&quot;Can&apos;t remove old version snmp&quot;)
           is_result_shell_build(&quot;echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} &gt; /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          //is_result_shell_build(&quot;rsync /tmp/build root@10.10.199.47:/tmp&quot;,&quot;Can&apos;t remove old version snmp&quot;)
+          is_result_shell_build(&quot;rsync /tmp/build root@10.10.199.47:/tmp&quot;,&quot;Can&apos;t remove old version snmp&quot;)
           is_result_shell_build(&quot;rm -f /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
         }
       }
