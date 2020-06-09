@@ -86,14 +86,14 @@
     <hudson.tasks.Shell>
       <command>sshpass -p &quot;34appterr21&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
     </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
+    <!--<hudson.tasks.Shell>
       <command>ssh jenkins@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*
 rsync ${WORKSPACE}/result/* jenkins@10.10.199.47:/tmp/rpms
 echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} > /tmp/build
 rsync /tmp/build jenkins@10.10.199.47:/tmp
 rm -f /tmp/build
       </command>
-    </hudson.tasks.Shell>
+    </hudson.tasks.Shell>-->
   </builders>
   <publishers/>
   <buildWrappers>

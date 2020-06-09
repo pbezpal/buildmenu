@@ -17,6 +17,7 @@ import git
 from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
+from time import sleep
 
 try:
     import spur
@@ -131,10 +132,10 @@ def getSelfConfig():
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
-    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
+    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_pipeline.xml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job_test.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_test.xml'))
     shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job.xml'))
-    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_roschat-client.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_roschat-client.xml'))
+    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_client_pipeline.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_client_pipeline.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -200,14 +201,14 @@ def build(project):
         if project['name'] == 'roschat-server':
             shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123",missing_host_key=spur.ssh.MissingHostKey.accept)
             shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
-        if project['name'] == 'roschat-client':
-            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r').read()
+        if project['name'] == 'roschat-client-test1':
+            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_client_pipeline.xml', 'r').read()
+            timeout = 60
         elif namespace.test:
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_test.xml', 'r').read()
         else:
-            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r').read()
-        # jenkins_job_config = open(script_dir+'/config/pipeline.xml', 'r')
-        # jenkins_job = jenkins_job_config.read()
+            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_pipeline.xml', 'r').read()
+            timeout = 10
         print('Job sent to Jenkins', jenkins_host)
         parameters={
             "PROJECT_NAME": project['name'],
@@ -228,17 +229,36 @@ def build(project):
         job = jenkins_main.get_job(project['name'])
         # if namespace.buildnumber:
         #     jenkins_helper.set_next_build_number(project['name'], int(namespace.buildnumber))
-        qi = job.invoke(build_params=parameters)
-        if qi.is_queued() or qi.is_running():
+        job.invoke(build_params=parameters)
+        #if qi.is_queued() or qi.is_running():
             # qi.block_until_complete()
-            if namespace.nowait == False:
-                try:
-                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=60, raise_on_timeout=False, username=username, password=token)
-                except Exception:
-                    jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=120, raise_on_timeout=False, username=username, password=token)
-        build_number = job.get_last_completed_buildnumber()
+        #    if namespace.nowait == False:
+        #        try:
+        #            jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=60, raise_on_timeout=False, username=username, password=token)
+        #        except Exception:
+        #            jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=120, raise_on_timeout=False, username=username, password=token)
+        try:
+            last_build_number = job.get_last_buildnumber()
+        except:
+            last_build_number = 0
+        count = 0
+        while True:
+            print("Waiting for build " + project['name'] + " to start...")
+            try:
+                build_number = job.get_last_buildnumber()
+            except:
+                build_number = 0
+            if last_build_number != build_number:
+                break
+            sleep(3)
+        current_build = job.get_last_build()
+        while current_build.is_running():
+            print("Waiting for job " + project['name'] + " to complete. Timestamp: " + str(count) + " seconds")
+            sleep(timeout)
+            count += timeout
+        print("Waiting for job " + project['name'] + " to complete. Total time: " + str(count) + " seconds")
         result = jenkins_helper.get_build_info(project['name'], build_number)
-        if result['result'] == 'FAILURE':
+        if result['result'] != 'SUCCESS':
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
@@ -247,6 +267,7 @@ def build(project):
     else:
         print('Local build not implemented yet')
         #os.system("build.py")
+
 
 def getSources(project):
     shell("rm -rf "+src_dir)

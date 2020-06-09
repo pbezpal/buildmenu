@@ -135,9 +135,6 @@
       <command>osslsigncode sign -pkcs12 /var/opt/n1.pfx -pass V090807It -h sha2 -t http://timestamp.comodoca.com/authenticode -in ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe -out ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command> ansible-playbook -vvvv -i /etc/ansible/windows/hosts /etc/ansible/windows/playbooks/windows.yml -e "client=${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe"</command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
       <command>rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
@@ -149,12 +146,12 @@
     <hudson.tasks.Shell>
       <command>rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe</command>
     </hudson.tasks.Shell>
-    <!--<hudson.tasks.Shell>
+    <hudson.tasks.Shell>
       <command>test -d /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/ || mkdir /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>mv ${WORKSPACE}/result /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}</command>
-    </hudson.tasks.Shell>-->
+    </hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers>
