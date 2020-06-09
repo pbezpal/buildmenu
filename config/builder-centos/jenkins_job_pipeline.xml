@@ -1,14 +1,6 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.39">
-  <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.0"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.0">
-      <jobProperties/>
-      <triggers/>
-      <parameters/>
-      <options/>
-    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
-  </actions>
+<project>
+  <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -47,86 +39,70 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.80">
-    <script>#!groovy
-
-/*import java.time.*
-import java.time.format.DateTimeFormatter
-
-String NOW = LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;d.M.Y_H:m&quot;))*/
-String BRANCH = &quot;${params.BRANCH}&quot;
-String VERSION = &quot;${params.VERSION}&quot;
-String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
-String TYPE = &quot;${params.TYPE}&quot;
-String GIT_URL = &quot;${params.GIT_URL}&quot;
-
-def is_result_shell_build(command,text){
-    if(currentBuild.result == &apos;SUCCESS&apos;){
-        try{
-            sh command    
-        }catch(err){
-            error(text)
-            currentBuild.result = &apos;ABORTED&apos;
-        }
-    }
-}
-
-pipeline{
-    agent {
-        label &apos;centos&apos;
-    }
-    options { timestamps () }
-    stages{
-      
-      stage(&quot;Cleaning the build directory&quot;){
-        steps{
-          deleteDir();
-        }
-      }
-      stage(&quot;Cloning from a git repository&quot;){
-        steps{
-          echo &quot;========== Cloning GIT ==========&quot;
-          script{
-            try{
-              git &quot;$GIT_URL&quot;
-            }catch(err){
-              currentBuild.result = &quot;ABORTED&quot;
-              error(&quot;Error copying from git repository&quot;)
-	          return;
-            }
-		    currentBuild.result = &quot;SUCCESS&quot;
-          }
-        }
-      }
-      stage(&quot;Build rpm&quot;){
-        steps{
-          echo &quot;========== Build ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} ==========&quot;
-          is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;The result of the assembly - failed&quot;)
-        }
-      }
-      stage(&quot;Rsync rpm on ftp&quot;){
-        steps{
-          echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on ftp ==========&quot;
-          script{
-            is_result_shell_build(&quot;sshpass -p &apos;34appterr21&apos; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/`date +&apos;%d.%m.%Y_%H:%M&apos;`_${VERSION}-${BUILD_NUMBER}/&quot;,&quot;Can&apos;t copy snmp on ftp&quot;)
-          }
-        }
-      }
-      stage(&quot;Rsync rpm for build and testing server&quot;){
-        steps{
-          echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server ==========&quot;
-          is_result_shell_build(&quot;ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} &gt; /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;rsync /tmp/build root@10.10.199.47:/tmp&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;rm -f /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-        }
-      }
-    }
-}</script>
-    <sandbox>true</sandbox>
-  </definition>
-  <triggers/>
-  <authToken>110afafd6a5bbe698b1e69a37390daaafd</authToken>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.12.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>$GIT_URL</url>
+        <credentialsId>994140eb-7d3c-4895-bd08-49ff6455d062</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>$BRANCH</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <assignedNode>centos</assignedNode>
+  <canRoam>false</canRoam>
   <disabled>false</disabled>
-</flow-definition>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <authToken>110afafd6a5bbe698b1e69a37390daaafd</authToken>
+  <triggers/>
+  <concurrentBuild>true</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>/bin/sh -c &quot;$BUILD_CMD&quot;</command>
+    </hudson.tasks.Shell>
+    <jenkins.plugins.ssh2easy.gssh.GsshShellBuilder plugin="ssh2easy@1.4">
+      <disable>true</disable>
+      <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
+      <groupName>builders</groupName>
+      <ip>10.10.199.31</ip>
+      <shell>mkdir -p /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</shell>
+    </jenkins.plugins.ssh2easy.gssh.GsshShellBuilder>
+    <jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder plugin="ssh2easy@1.4">
+      <disable>true</disable>
+      <serverInfo>builders~~debian~~10.10.199.31</serverInfo>
+      <groupName>builders</groupName>
+      <ip>10.10.199.31</ip>
+      <localFilePath>${WORKSPACE}/result/*</localFilePath>
+      <remoteLocation>/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</remoteLocation>
+    </jenkins.plugins.ssh2easy.gssh.GsshFtpUploadBuilder>
+    <hudson.tasks.Shell>
+      <command>sshpass -p &quot;34appterr21&quot; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/$(date +&apos;%d.%m.%Y_%H:%M&apos;)_${VERSION}-${BUILD_NUMBER}/</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*
+rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms
+echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} > /tmp/build
+rsync /tmp/build root@10.10.199.47:/tmp
+rm -f /tmp/build
+      </command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
+  </buildWrappers>
+</project>
