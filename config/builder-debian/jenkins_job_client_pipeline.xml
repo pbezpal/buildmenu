@@ -91,7 +91,7 @@ pipeline{
           echo &quot;========== Cloning GIT ==========&quot;
           script{
             //try{
-              git branch: &quot;${BRANCH}&quot;, &quot;$GIT_URL&quot;
+              git branch: &apos;${BRANCH}&apos;, url: &apos;${GIT_URL}&apos;
             /*}catch(err){
               currentBuild.result = &quot;ABORTED&quot;
               error(&quot;Error copying from git repository&quot;)
