@@ -17,7 +17,7 @@
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description></description>
-          <defaultValue>develop</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -91,7 +91,7 @@ pipeline{
           echo &quot;========== Cloning GIT ==========&quot;
           script{
             try{
-              git &quot;$GIT_URL&quot;
+              git branch: &quot;$BRANCH&quot;,&quot;$GIT_URL&quot;
             }catch(err){
               currentBuild.result = &quot;ABORTED&quot;
               error(&quot;Error copying from git repository&quot;)
