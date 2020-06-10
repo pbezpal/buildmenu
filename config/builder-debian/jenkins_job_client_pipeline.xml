@@ -17,7 +17,7 @@
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description></description>
-          <defaultValue>develop</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -90,17 +90,14 @@ pipeline{
         steps{
           echo &quot;========== Cloning GIT ==========&quot;
           script{
-            //try{
-              git branch: &apos;develop&apos;, url: &apos;${GIT_URL}&apos;
-              sh(script:&quot;&quot;&quot;
-                    git checkout \$(git rev-parse --verify ${BRANCH})
-                &quot;&quot;&quot;)
-            /*}catch(err){
+            try{
+              checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;${BRANCH}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;${GIT_URL}&apos;]]])
+            }catch(err){
               currentBuild.result = &quot;ABORTED&quot;
               error(&quot;Error copying from git repository&quot;)
 	          return;
-            }*/
-		    //currentBuild.result = &quot;SUCCESS&quot;
+            }
+		    currentBuild.result = &quot;SUCCESS&quot;
           }
         }
       }

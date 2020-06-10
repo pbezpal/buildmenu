@@ -258,12 +258,12 @@ def build(project):
             count += timeout
         print("Waiting for job " + project['name'] + " to complete. Total time: " + str(count) + " seconds")
         result = jenkins_helper.get_build_info(project['name'], build_number)
-        if result['result'] != 'SUCCESS':
+        if not (result['result'] == 'SUCCESS'):
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
-            #if not (project['name'] == 'roschat-client'):
-            #    jenkins_helper.build_job("roschat-server_docker")
+            if not (project['name'] == 'roschat-client'):
+                jenkins_helper.build_job("roschat-server_docker")
     else:
         print('Local build not implemented yet')
         #os.system("build.py")
