@@ -132,10 +132,10 @@ def getSelfConfig():
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
-    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job_pipeline.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_pipeline.xml'))
+    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job_test.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_test.xml'))
     shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job.xml'))
-    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_client_pipeline.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_client_pipeline.xml'))
+    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_roschat-client.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_roschat-client.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -202,12 +202,12 @@ def build(project):
             shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123",missing_host_key=spur.ssh.MissingHostKey.accept)
             shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
         if project['name'] == 'roschat-client':
-            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_client_pipeline.xml', 'r').read()
+            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_roschat-client.xml', 'r').read()
             timeout = 60
         elif namespace.test:
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_test.xml', 'r').read()
         else:
-            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_pipeline.xml', 'r').read()
+            jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job.xml', 'r').read()
             timeout = 10
         print('Job sent to Jenkins', jenkins_host)
         parameters={
@@ -262,8 +262,8 @@ def build(project):
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
-            #if not (project['name'] == 'roschat-client'):
-            #    jenkins_helper.build_job("roschat-server_docker")
+            if not (project['name'] == 'roschat-client'):
+                jenkins_helper.build_job("roschat-server_docker")
     else:
         print('Local build not implemented yet')
         #os.system("build.py")
