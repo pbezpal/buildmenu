@@ -17,7 +17,7 @@
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description></description>
-          <defaultValue>master</defaultValue>
+          <defaultValue>develop</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -39,6 +39,12 @@
           <trim>true</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>BUILD_TIME</name>
+          <description></description>
+          <defaultValue>_</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>TYPE</name>
           <description></description>
           <defaultValue>server</defaultValue>
@@ -50,15 +56,12 @@
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.80">
     <script>#!groovy
 
-/*import java.time.*
-import java.time.format.DateTimeFormatter
-
-String NOW = LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;d.M.Y_H:m&quot;))*/
 String BRANCH = &quot;${params.BRANCH}&quot;
 String VERSION = &quot;${params.VERSION}&quot;
 String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
 String TYPE = &quot;${params.TYPE}&quot;
 String GIT_URL = &quot;${params.GIT_URL}&quot;
+String BUILD_TIME = &quot;${params.BUILD_TIME}&quot;
 
 def is_result_shell_build(command,text){
     if(currentBuild.result == &apos;SUCCESS&apos;){
@@ -73,7 +76,7 @@ def is_result_shell_build(command,text){
 
 pipeline{
     agent {
-        label &apos;centos&apos;
+        label &apos;debian&apos;
     }
     options { timestamps () }
     stages{
@@ -98,28 +101,71 @@ pipeline{
           }
         }
       }
-      stage(&quot;Build rpm&quot;){
+      stage(&quot;Build linux client&quot;){
         steps{
-          echo &quot;========== Build ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} ==========&quot;
-          is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;The result of the assembly - failed&quot;)
+          echo &quot;========== Build linux client ==========&quot;
+          is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;Can&apos;t build linux client&quot;)
         }
       }
-      stage(&quot;Rsync rpm on ftp&quot;){
+      stage(&quot;Cleaning build directory on macos&quot;){
+        agent { label &apos;macos&apos; }
         steps{
-          echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on ftp ==========&quot;
+          echo &quot;========== Cleaning build directory on macos ==========&quot;
           script{
-            is_result_shell_build(&quot;sshpass -p &apos;34appterr21&apos; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/`date +&apos;%d.%m.%Y_%H:%M&apos;`_${VERSION}-${BUILD_NUMBER}/&quot;,&quot;Can&apos;t copy snmp on ftp&quot;)
+            is_result_shell_build(&quot;rm -rf /Users/developer/darwin/*&quot;,&quot;Can&apos;t clear build directory on macos&quot;)
           }
         }
       }
-      stage(&quot;Rsync rpm for build and testing server&quot;){
+	  stage(&quot;Build macos client&quot;){
         steps{
-          echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server ==========&quot;
-          is_result_shell_build(&quot;ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} &gt; /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;rsync /tmp/build root@10.10.199.47:/tmp&quot;,&quot;Can&apos;t remove old version snmp&quot;)
-          is_result_shell_build(&quot;rm -f /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
+		  echo &quot;========== Copying data for build on macos ==========&quot;
+          is_result_shell_build(&quot;scp -r ${WORKSPACE}/clients/demo/darwin/РосЧат-darwin-x64/* developer@10.10.38.175:/Users/developer/darwin/&quot;,&quot;Can&apos;t copying data on macos&quot;)
+          echo &quot;========== Running build client on macos ==========&quot;
+          is_result_shell_build(&quot;sshpass -p &apos;develop&apos; ssh developer@10.10.38.175 &apos;/usr/local/bin/node /usr/local/bin/electron-installer-dmg darwin/РосЧат.app  --overwrite darwin/roschat-${VERSION}-${BUILD_NUMBER}&apos;&quot;,&quot;Can&apos;t build macos client&quot;)
+		  echo &quot;========== Creating temp directory for macos client ==========&quot;
+          is_result_shell_build(&quot;mkdir -p ${WORKSPACE}/result/macos/x64&quot;,&quot;Can&apos;t create temp directory for macos client&quot;)
+          echo &quot;========== Copying macos client to temp directory ==========&quot;
+          is_result_shell_build(&quot;scp -r developer@10.10.38.175:/Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg ${WORKSPACE}/result/macos/x64/roschat-${VERSION}.${BUILD_NUMBER}.dmg&quot;,&quot;Can&apos;t copying macos client to temp directory&quot;)
+        }
+      }
+	  stage(&quot;Create temp directory for client of windows&quot;){
+        steps{
+          echo &quot;========== Creating temp directory for client of windows/x64 ==========&quot;
+          is_result_shell_build(&quot;mkdir -p ${WORKSPACE}/result/windows/x64&quot;,&quot;Can&apos;t create temp directory for client of windows/x64&quot;)
+		  echo &quot;========== Creating temp directory for client of windows/ia32 ==========&quot;
+          is_result_shell_build(&quot;mkdir -p ${WORKSPACE}/result/windows/ia32&quot;,&quot;Can&apos;t create temp directory for client of windows/ia32&quot;)
+        }
+      }	  
+	  stage(&quot;Build client of windows x64&quot;){
+        steps{
+          echo &quot;========== Build client of windows/x64 ==========&quot;
+          is_result_shell_build(&quot;electron-builder --win --x64 --project ${WORKSPACE}/clients/demo/js/electron&quot;,&quot;Can&apos;t build client of windows/x64&quot;)
+		  echo &quot;========== Signing ssl code to client of windows/x64 ==========&quot;
+          is_result_shell_build(&quot;osslsigncode sign -pkcs12 /var/opt/n1.pfx -pass V090807It -h sha2 -t http://timestamp.comodoca.com/authenticode -in ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe -out ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe&quot;,&quot;Can&apos;t singing ssl code to client of windows/x64&quot;)
+		  echo &quot;========== Delete exe file after build client of windows/x64 ==========&quot;
+          is_result_shell_build(&quot;rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe&quot;,&quot;Can&apos;t delete exe file after build client of windows/x64&quot;)
+        }
+      }
+	  stage(&quot;Build client of windows/ia32&quot;){
+        steps{
+          echo &quot;========== Build client of windows/ia32 ==========&quot;
+          is_result_shell_build(&quot;electron-builder --win --ia32 --project ${WORKSPACE}/clients/demo/js/electron&quot;,&quot;Can&apos;t build client of windows/ia32&quot;)
+		  echo &quot;========== Signing ssl code to client of windows/ia32 ==========&quot;
+		  is_result_shell_build(&quot;osslsigncode sign -pkcs12 /var/opt/n1.pfx -pass V090807It -h sha2 -t http://timestamp.comodoca.com/authenticode -in ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe -out ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe&quot;,&quot;Can&apos;t singing ssl code to client of windows/ia32&quot;)
+		  echo &quot;========== Delete exe file after build client of windows/ia32 ==========&quot;
+          is_result_shell_build(&quot;rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe&quot;,&quot;Can&apos;t delete exe file after build client of windows/ia32&quot;)
+        }
+      }
+	  stage(&quot;Create directory on ftp&quot;){
+        steps{
+          echo &quot;========== Create directory on ftp ==========&quot;
+          is_result_shell_build(&quot;test -d /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/ || mkdir /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/&quot;,&quot;Can&apos;t create directory on ftp&quot;)
+        }
+      }
+	  stage(&quot;Move clients to ftp&quot;){
+        steps{
+          echo &quot;========== Moving clients to ftp ==========&quot;
+          is_result_shell_build(&quot;mv ${WORKSPACE}/result /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${BUILD_TIME}_${VERSION}-${BUILD_NUMBER}&quot;,&quot;Can&apos;t move clients to ftp&quot;)
         }
       }
     }
