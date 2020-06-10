@@ -22,15 +22,15 @@ from time import sleep
 try:
     import spur
 except ImportError:
-    print('Библиотека spur не установлена, устанавливаю...')
+    print('Lib spur not find, installing...')
     os.system('pip3 install spur')
 
+"""Lib for run shell commands"""
 import spur
-# Requests patch for fix readtimeout exception
+"""Requests patch for fix readtimeout exception"""
 import requests
 
 def request_patch(slf, *args, **kwargs):
-    # print("Fix called")
     timeout = kwargs.pop('timeout', 100)
     return slf.request_orig(*args, **kwargs, timeout=timeout)
 
@@ -125,6 +125,7 @@ parser.add_argument('-T', '--test', nargs='?', default=False)
 
 namespace = parser.parse_args()
 
+"""Get configs for build"""
 def getSelfConfig():
     config_git_url = 'ssh://shavlovskiy_sn@10.10.199.35/opt/git/ormp_builds'
     pathlib.Path(script_dir+'/config').mkdir(parents=True, exist_ok=True)
@@ -132,10 +133,10 @@ def getSelfConfig():
     t = tempfile.mkdtemp()
     git.Repo.clone_from(config_git_url, t, branch='master', depth=1)
     shutil.move(os.path.join(t, 'config/project_list.yml'), os.path.join(script_dir,'config/project_list.yml'))
-    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job.xml'))
+    shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_pipeline.xml'))
     shutil.move(os.path.join(t, 'config/builder-centos/jenkins_job_test.xml'), os.path.join(script_dir,'config/builder-centos/jenkins_job_test.xml'))
     shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job.xml'))
-    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_roschat-client.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_roschat-client.xml'))
+    shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_roschat-client.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_client_pipeline.xml'))
     shutil.rmtree(t)
 
 getSelfConfig()
@@ -196,8 +197,10 @@ def getProjectTag(tag=None):
         if project['app']['name'] == tag:
                 return str(project['app']['git']['tag'])
 
+"""This method create job with parameters and monitoring status job"""
 def build(project):
     if namespace.nojenkins == False:
+        """Deleting roschat-node-module for copy new version to server build docker"""
         if project['name'] == 'roschat-server':
             shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123",missing_host_key=spur.ssh.MissingHostKey.accept)
             shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
@@ -221,27 +224,19 @@ def build(project):
             "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M')
         }
         print(project['git']['branch'])
-        # jenkins.build_job('build', parameters)
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
         else:
             jenkins_helper.reconfig_job(project['name'], jenkins_job)
         job = jenkins_main.get_job(project['name'])
-        # if namespace.buildnumber:
-        #     jenkins_helper.set_next_build_number(project['name'], int(namespace.buildnumber))
+        """Transmit parameters to build job"""
         job.invoke(build_params=parameters)
-        #if qi.is_queued() or qi.is_running():
-            # qi.block_until_complete()
-        #    if namespace.nowait == False:
-        #        try:
-        #            jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=60, raise_on_timeout=False, username=username, password=token)
-        #        except Exception:
-        #            jenkinsapi.api.block_until_complete(jenkinsurl=jenkins_host, jobs = [project['name']], maxwait=7200, interval=120, raise_on_timeout=False, username=username, password=token)
         try:
             last_build_number = job.get_last_buildnumber()
         except:
             last_build_number = 0
         count = 0
+        """Monitoring status job"""
         while True:
             print("Waiting for build " + project['name'] + " to start...")
             try:
@@ -258,16 +253,15 @@ def build(project):
             count += timeout
         print("Waiting for job " + project['name'] + " to complete. Total time: " + str(count) + " seconds")
         result = jenkins_helper.get_build_info(project['name'], build_number)
-        if not (result['result'] == 'SUCCESS'):
+        if result['result'] != 'SUCCESS':
             print(jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print(result['result'])
             if not (project['name'] == 'roschat-client'):
+                """Run build docker image of server"""
                 jenkins_helper.build_job("roschat-server_docker")
     else:
         print('Local build not implemented yet')
-        #os.system("build.py")
-
 
 def getSources(project):
     shell("rm -rf "+src_dir)
