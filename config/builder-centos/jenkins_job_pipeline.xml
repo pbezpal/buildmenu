@@ -84,7 +84,6 @@ pipeline{
           echo &quot;========== Cloning GIT ==========&quot;
           script{
             try{
-              //git &quot;$GIT_URL&quot;
               checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;${BRANCH}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;${GIT_URL}&apos;]]])
             }catch(err){
               currentBuild.result = &quot;ABORTED&quot;
@@ -117,6 +116,13 @@ pipeline{
           is_result_shell_build(&quot;echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} &gt; /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
           is_result_shell_build(&quot;rsync /tmp/build root@10.10.199.47:/tmp&quot;,&quot;Can&apos;t remove old version snmp&quot;)
           is_result_shell_build(&quot;rm -f /tmp/build&quot;,&quot;Can&apos;t remove old version snmp&quot;)
+        }
+      }
+      stage(&quot;Run job build server&quot;){
+        steps{
+          if(currentBuild.result == &apos;SUCCESS&apos;){
+            build job: &apos;roschat-server_docker&apos;, wait: false  
+          }
         }
       }
     }
