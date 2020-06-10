@@ -78,6 +78,11 @@ pipeline{
     agent {
         label &apos;debian&apos;
     }
+    parameters {
+        gitParameter name: &apos;TAG&apos;, 
+                     type: &apos;PT_TAG&apos;,
+                     defaultValue: &apos;develop&apos;
+    }
     options { timestamps () }
     stages{
       
@@ -91,7 +96,8 @@ pipeline{
           echo &quot;========== Cloning GIT ==========&quot;
           script{
             //try{
-              git branch: &apos;${BRANCH}&apos;, url: &apos;${GIT_URL}&apos;
+              git url: &quot;$GIT_URL&quot;
+              sh &quot;git checkout \$(git rev-parse --verify ${BRANCH})&quot;
             /*}catch(err){
               currentBuild.result = &quot;ABORTED&quot;
               error(&quot;Error copying from git repository&quot;)
