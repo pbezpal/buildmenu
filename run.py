@@ -238,13 +238,13 @@ def build(project):
         point = 1
         """Monitoring status job"""
         while True:
-            sys.stdout.write("\r" + "Waiting for build " + project['name'] + " to start" + "." * point)
             try:
                 build_number = job.get_last_buildnumber()
             except:
                 build_number = 0
             if last_build_number != build_number:
                 break
+            sys.stdout.write("\r" + "Waiting for build " + project['name'] + " to start" + "." * point)
             sleep(2)
             point += 1
             sys.stdout.flush()
@@ -259,7 +259,7 @@ def build(project):
             sys.stdout.write("\r" + "Complete [" + str(persent) + "% " + "=" * persent + ">" + " " * space + "]")
             sleep(5)
             sys.stdout.flush()
-        sys.stdout.write("\b\r" + "Complete [100% " +  "=" * persent + ">]\n")
+        sys.stdout.write("\b\r" + "Complete [100% " +  "=" * 100 + ">]\n")
         sys.stdout.flush()
         result = jenkins_helper.get_build_info(project['name'], build_number)
         if result['result'] != 'SUCCESS':
