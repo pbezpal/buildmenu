@@ -103,9 +103,7 @@ pipeline{
       stage(&quot;Rsync rpm on ftp&quot;){
         steps{
           echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on ftp ==========&quot;
-          script{
-            is_result_shell_build(&quot;sshpass -p &apos;34appterr21&apos; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/`date +&apos;%d.%m.%Y_%H:%M&apos;`_${VERSION}-${BUILD_NUMBER}/&quot;,&quot;Can&apos;t copy snmp on ftp&quot;)
-          }
+          is_result_shell_build(&quot;sshpass -p &apos;34appterr21&apos; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/`date +&apos;%d.%m.%Y_%H:%M&apos;`_${VERSION}-${BUILD_NUMBER}/&quot;,&quot;Can&apos;t copy snmp on ftp&quot;)
         }
       }
       stage(&quot;Rsync rpm for build and testing server&quot;){
@@ -120,8 +118,10 @@ pipeline{
       }
       stage(&quot;Run job build server&quot;){
         steps{
-          if(currentBuild.result == &apos;SUCCESS&apos;){
-            build job: &apos;roschat-server_docker&apos;, wait: false  
+          script{
+            if(currentBuild.result == &apos;SUCCESS&apos;){
+              build job: &apos;roschat-server_docker&apos;, wait: false  
+            }
           }
         }
       }
