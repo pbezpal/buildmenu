@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys,os,subprocess
 import os
+import sys
 import re
 import tempfile,shutil
 import jinja2
@@ -14,6 +15,7 @@ import requests
 import jenkins,jenkinsapi
 import time
 import git
+import calendar
 from jenkinsapi.jenkins import Jenkins
 from jinja2 import Template
 from datetime import datetime
@@ -206,15 +208,10 @@ def build(project):
             shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
         if project['name'] == 'roschat-client':
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_client_pipeline.xml', 'r').read()
-            timeout = 60
         elif namespace.test:
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_test.xml', 'r').read()
         else:
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_pipeline.xml', 'r').read()
-            if project['name'] == 'roschat-snmp':
-                timeout = 10
-            else:
-                timeout = 30
         print('Job sent to Jenkins', jenkins_host)
         parameters={
             "PROJECT_NAME": project['name'],
@@ -238,28 +235,37 @@ def build(project):
             last_build_number = job.get_last_buildnumber()
         except:
             last_build_number = 0
-        count = 0
+        point = 1
         """Monitoring status job"""
         while True:
-            print("Waiting for build " + project['name'] + " to start...")
+            sys.stdout.write("\r" + "Waiting for build " + project['name'] + " to start" + "." * point)
             try:
                 build_number = job.get_last_buildnumber()
             except:
                 build_number = 0
             if last_build_number != build_number:
                 break
-            sleep(3)
-        current_build = job.get_last_build()
-        while current_build.is_running():
-            print("Waiting for job " + project['name'] + " to complete. Timestamp: " + str(count) + " seconds")
-            sleep(timeout)
-            count += timeout
-        print("Waiting for job " + project['name'] + " to complete. Total time: " + str(count) + " seconds")
+            sleep(2)
+            point += 1
+            sys.stdout.flush()
+        print("\n")
+        build_info = jenkins_helper.get_build_info(project['name'], build_number)
+        print(build_info['estimatedDuration'])
+        while True:
+            persent = round((int(str(calendar.timegm(time.gmtime())) + "000") - int(build_info['timestamp'])) / int(build_info['estimatedDuration']) * 100)
+            if (persent == 100 or persent > 100):
+               break
+            space = 100 - persent
+            sys.stdout.write("\r" + "Complete [" + str(persent) + "% " + "=" * persent + ">" + " " * space + "]")
+            sleep(5)
+            sys.stdout.flush()
+        sys.stdout.write("\b\r" + "Complete [100% " +  "=" * persent + ">]\n")
+        sys.stdout.flush()
         result = jenkins_helper.get_build_info(project['name'], build_number)
         if result['result'] != 'SUCCESS':
-            print(jenkins_helper.get_build_console_output(project['name'], build_number))
+            print("\n" + jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
-            print(result['result'])
+            print("\nResult build: " + result['result'])
     else:
         print('Local build not implemented yet')
 
