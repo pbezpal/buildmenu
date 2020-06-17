@@ -250,7 +250,7 @@ def build(project):
             sys.stdout.flush()
         print("\n")
         build_info = jenkins_helper.get_build_info(project['name'], build_number)
-        print(build_info['estimatedDuration'])
+        print(build_number)
         while True:
             persent = round((int(str(calendar.timegm(time.gmtime())) + "000") - int(build_info['timestamp'])) / int(build_info['estimatedDuration']) * 100)
             if (persent == 100 or persent > 100):
@@ -261,8 +261,7 @@ def build(project):
             sys.stdout.flush()
         sys.stdout.write("\b\r" + "Complete [100% " +  "=" * 100 + ">]\n")
         sys.stdout.flush()
-        result = jenkins_helper.get_build_info(project['name'], build_number)
-        if result['result'] != 'SUCCESS':
+        if build_info['result'] != 'SUCCESS':
             print("\n" + jenkins_helper.get_build_console_output(project['name'], build_number))
         else:
             print("\nResult build: " + result['result'])
