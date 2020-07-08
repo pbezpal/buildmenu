@@ -213,33 +213,45 @@ def build(project):
         else:
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_pipeline.xml', 'r').read()
         print('Job sent to Jenkins', jenkins_host)
-        print("\r\nList type build:\r\n")
-        print("1. Release")
-        print("2. Office")
-        print("\nq: Quit")
-        while True:
-            type_build = input("Select type build: ")
-            if type_build.isnumeric():
-                type_build = int(type_build)
-                if type_build == 1:
-                    build_type = 'release'
-                    break
-                elif type_build == 2:
-                    build_type = 'office'
-                    break
-            elif type_build == 'q':
-                exit(0)
-        parameters={
-            "PROJECT_NAME": project['name'],
-            "GIT_URL":project['git']['url'],
-            "BRANCH":project['git']['branch'],
-            "BUILD_CMD":project['buildCmd'],
-            "BUILD_MACHINE": project['buildMachine'],
-            "VERSION":re.sub(r'e', '', project['git']['tag']),
-            "TYPE":project['type'],
-            "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M'),
-            "BUILD_TYPE":build_type
-        }
+        if not project['name'] == 'roschat-client':
+            print("\r\nList type build:\r\n")
+            print("1. Release")
+            print("2. Office")
+            print("\nq: Quit")
+            while True:
+                type_build = input("Select type build: ")
+                if type_build.isnumeric():
+                    type_build = int(type_build)
+                    if type_build == 1:
+                        build_type = 'relsease'
+                        break
+                    elif type_build == 2:
+                        build_type = 'office'
+                        break
+                elif type_build == 'q':
+                    exit(0)
+            parameters = {
+                "PROJECT_NAME": project['name'],
+                "GIT_URL": project['git']['url'],
+                "BRANCH": project['git']['branch'],
+                "BUILD_CMD": project['buildCmd'],
+                "BUILD_MACHINE": project['buildMachine'],
+                "VERSION": re.sub(r'e', '', project['git']['tag']),
+                "TYPE": project['type'],
+                "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M'),
+                "BUILD_TYPE": build_type
+            }
+        else:
+            parameters = {
+                "PROJECT_NAME": project['name'],
+                "GIT_URL": project['git']['url'],
+                "BRANCH": project['git']['branch'],
+                "BUILD_CMD": project['buildCmd'],
+                "BUILD_MACHINE": project['buildMachine'],
+                "VERSION": re.sub(r'e', '', project['git']['tag']),
+                "TYPE": project['type'],
+                "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M')
+            }
         print(project['git']['branch'])
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)
