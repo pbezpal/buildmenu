@@ -47,7 +47,7 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.80">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.81">
     <script>#!groovy
 
 String BRANCH = &quot;${params.BRANCH}&quot;
@@ -100,10 +100,24 @@ pipeline{
           is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;The result of the assembly - failed&quot;)
         }
       }
-      stage(&quot;Rsync rpm on ftp&quot;){
+      stage(&quot;Push rpm to repo&quot;){
         steps{
-          echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on ftp ==========&quot;
-          is_result_shell_build(&quot;sshpass -p &apos;34appterr21&apos; rsync -r -e ssh ${WORKSPACE}/result/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/`date +&apos;%d.%m.%Y_%H:%M&apos;`_${VERSION}-${BUILD_NUMBER}/&quot;,&quot;Can&apos;t copy snmp on ftp&quot;)
+          echo &quot;========== Push ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} to repo ==========&quot;
+          script{
+            if(currentBuild.result == &apos;SUCCESS&apos;){
+                try{
+                    sh &apos;&apos;&apos;#!/bin/bash
+                          folder=`date +\&apos;%d.%m.%Y_%H:%M\&apos;`_${VERSION}-${BUILD_NUMBER}
+                          for rpm in `ls ${WORKSPACE}/result/`
+                          do
+                            curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.release/$folder/$rpm
+                          done&apos;&apos;&apos;   
+                }catch(err){
+                    error(text)
+                    currentBuild.result = &apos;ABORTED&apos;
+                }
+            }  
+          }
         }
       }
       stage(&quot;Rsync rpm for build and testing server&quot;){
