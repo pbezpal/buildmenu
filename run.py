@@ -141,7 +141,7 @@ def getSelfConfig():
     shutil.move(os.path.join(t, 'config/builder-debian/jenkins_job_client_pipeline.xml'), os.path.join(script_dir,'config/builder-debian/jenkins_job_client_pipeline.xml'))
     shutil.rmtree(t)
 
-#getSelfConfig()
+getSelfConfig()
 
 
 def filterProjects(projects):
