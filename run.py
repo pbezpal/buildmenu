@@ -215,18 +215,22 @@ def build(project):
         print('Job sent to Jenkins', jenkins_host)
         if not project['name'] == 'roschat-client':
             print("\r\nList type build:\r\n")
-            print("1. Release")
-            print("2. Office")
+            print("1. Develop")
+            print("2. Pre-Release")
+            print("3. Release")
             print("\nq: Quit")
             while True:
                 type_build = input("Select type build: ")
                 if type_build.isnumeric():
                     type_build = int(type_build)
                     if type_build == 1:
-                        build_type = 'relsease'
+                        build_type = 'develop'
                         break
                     elif type_build == 2:
-                        build_type = 'office'
+                        build_type = 'pre-release'
+                        break
+                    elif type_build == 3:
+                        build_type = 'release'
                         break
                 elif type_build == 'q':
                     exit(0)
