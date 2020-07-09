@@ -47,7 +47,7 @@
         <hudson.model.StringParameterDefinition>
           <name>BUILD_TYPE</name>
           <description></description>
-          <defaultValue>relsease</defaultValue>
+          <defaultValue>pre-relsease</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -62,6 +62,8 @@ String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
 String TYPE = &quot;${params.TYPE}&quot;
 String GIT_URL = &quot;${params.GIT_URL}&quot;
 String BUILD_TYPE = &quot;${params.BUILD_TYPE}&quot;
+String CURRENT_DATE = new Date().format(&apos;dd.MM.yyyy_H:m&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
+String FOLDER = &quot;${CURRENT_DATE}_${params.VERSION}-${BUILD_NUMBER}&quot;
 
 def is_result_shell_build(command,text){
     if(currentBuild.result == &apos;SUCCESS&apos;){
@@ -97,6 +99,15 @@ pipeline{
               error(&quot;Error copying from git repository&quot;)
 	          return;
             }
+            if(BUILD_TYPE.equals(&apos;pre-release&apos;) || BUILD_TYPE.equals(&apos;release&apos;)){
+                try{
+                    sh &quot;sshpass -p \&quot;34appterr21\&quot; rsync -r -e ssh ${WORKSPACE}/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${FOLDER}/&quot;
+                }catch(err){
+                    currentBuild.result = &quot;ABORTED&quot;
+                    error(&quot;Error copying source code to ftp&quot;)
+	                return;
+                }
+            }
 		    currentBuild.result = &quot;SUCCESS&quot;
           }
         }
@@ -114,36 +125,24 @@ pipeline{
             if(currentBuild.result == &apos;SUCCESS&apos;){
                 if(BUILD_TYPE.equals(&apos;develop&apos;)){
                     try{
-                        sh &apos;&apos;&apos;#!/bin/bash
-                          folder=`date +\&apos;%d.%m.%Y_%H:%M\&apos;`_${VERSION}-${BUILD_NUMBER}
-                          for rpm in `ls ${WORKSPACE}/result/`
-                          do
-                            curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.develop/$folder/$rpm
-                          done&apos;&apos;&apos;   
+                        sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.develop ${FOLDER}&quot;
+                        //sh &quot;for rpm in `ls ${WORKSPACE}/result/`; do curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.develop/${FOLDER}/$rpm; done&quot;   
                     }catch(err){
                         error(text)
                         currentBuild.result = &apos;ABORTED&apos;
                     }
                 }else if(BUILD_TYPE.equals(&apos;pre-release&apos;)){
                     try{
-                        sh &apos;&apos;&apos;#!/bin/bash
-                          folder=`date +\&apos;%d.%m.%Y_%H:%M\&apos;`_${VERSION}-${BUILD_NUMBER}
-                          for rpm in `ls ${WORKSPACE}/result/`
-                          do
-                            curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.pre-release/$folder/$rpm
-                          done&apos;&apos;&apos;   
+                        sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.pre-release ${FOLDER}&quot;
+                        //sh &quot;for rpm in `ls ${WORKSPACE}/result/`; do curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.pre-release/${FOLDER}/$rpm; done&quot;   
                     }catch(err){
                         error(text)
                         currentBuild.result = &apos;ABORTED&apos;
                     }
                 }else if(BUILD_TYPE.equals(&apos;release&apos;)){
                     try{
-                        sh &apos;&apos;&apos;#!/bin/bash
-                          folder=`date +\&apos;%d.%m.%Y_%H:%M\&apos;`_${VERSION}-${BUILD_NUMBER}
-                          for rpm in `ls ${WORKSPACE}/result/`
-                          do
-                            curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.release/$folder/$rpm
-                          done&apos;&apos;&apos;   
+                        sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.release ${FOLDER}&quot;
+                         //sh &quot;for rpm in `ls ${WORKSPACE}/result/`; do curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.develop/${FOLDER}/$rpm; done&quot;   
                     }catch(err){
                         error(text)
                         currentBuild.result = &apos;ABORTED&apos;
