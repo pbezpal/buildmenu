@@ -62,7 +62,7 @@ String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
 String TYPE = &quot;${params.TYPE}&quot;
 String GIT_URL = &quot;${params.GIT_URL}&quot;
 String BUILD_TYPE = &quot;${params.BUILD_TYPE}&quot;
-String CURRENT_DATE = new Date().format(&apos;dd.MM.yyyy_H:m&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
+String CURRENT_DATE = new Date().format(&apos;dd.MM.yyyy_HH:mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
 String FOLDER = &quot;${CURRENT_DATE}_${params.VERSION}-${BUILD_NUMBER}&quot;
 
 def is_result_shell_build(command,text){
@@ -126,7 +126,6 @@ pipeline{
                 if(BUILD_TYPE.equals(&apos;develop&apos;)){
                     try{
                         sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.develop ${FOLDER}&quot;
-                        //sh &quot;for rpm in `ls ${WORKSPACE}/result/`; do curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.develop/${FOLDER}/$rpm; done&quot;   
                     }catch(err){
                         error(text)
                         currentBuild.result = &apos;ABORTED&apos;
@@ -134,7 +133,6 @@ pipeline{
                 }else if(BUILD_TYPE.equals(&apos;pre-release&apos;)){
                     try{
                         sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.pre-release ${FOLDER}&quot;
-                        //sh &quot;for rpm in `ls ${WORKSPACE}/result/`; do curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.pre-release/${FOLDER}/$rpm; done&quot;   
                     }catch(err){
                         error(text)
                         currentBuild.result = &apos;ABORTED&apos;
@@ -142,7 +140,6 @@ pipeline{
                 }else if(BUILD_TYPE.equals(&apos;release&apos;)){
                     try{
                         sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.release ${FOLDER}&quot;
-                         //sh &quot;for rpm in `ls ${WORKSPACE}/result/`; do curl -v --user &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/$rpm http://10.10.199.217:8080/repository/${JOB_NAME}.develop/${FOLDER}/$rpm; done&quot;   
                     }catch(err){
                         error(text)
                         currentBuild.result = &apos;ABORTED&apos;
