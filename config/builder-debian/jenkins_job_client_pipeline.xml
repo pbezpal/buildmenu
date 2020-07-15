@@ -74,8 +74,8 @@ def is_result_shell_build(command,text){
             sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/macos/x64/roschat-${VERSION}-${BUILD_NUMBER}.dmg&quot;
             sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe&quot;
             sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe&quot;
+            currentBuild.result = &apos;FAILURE&apos;
             error(text)
-            currentBuild.result = &apos;ABORTED&apos;
         }
     }
 }
@@ -99,7 +99,7 @@ pipeline{
             try{
               checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;${BRANCH}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;${GIT_URL}&apos;]]])
             }catch(err){
-              currentBuild.result = &quot;ABORTED&quot;
+              currentBuild.result = &quot;FAILURE&quot;
               error(&quot;Error copying from git repository&quot;)
 	          return;
             }

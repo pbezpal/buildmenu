@@ -70,8 +70,8 @@ def is_result_shell_build(command,text){
         try{
             sh command    
         }catch(err){
+            currentBuild.result = &apos;FAILURE&apos;
             error(text)
-            currentBuild.result = &apos;ABORTED&apos;
         }
     }
 }
@@ -95,7 +95,7 @@ pipeline{
             try{
               checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;${BRANCH}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;${GIT_URL}&apos;]]])
             }catch(err){
-              currentBuild.result = &quot;ABORTED&quot;
+              currentBuild.result = &quot;FAILURE&quot;
               error(&quot;Error copying from git repository&quot;)
 	          return;
             }
@@ -103,7 +103,7 @@ pipeline{
                 try{
                     sh &quot;sshpass -p \&quot;34appterr21\&quot; rsync -r -e ssh ${WORKSPACE}/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${FOLDER}/&quot;
                 }catch(err){
-                    currentBuild.result = &quot;ABORTED&quot;
+                    currentBuild.result = &quot;FAILURE&quot;
                     error(&quot;Error copying source code to ftp&quot;)
 	                return;
                 }
@@ -124,26 +124,11 @@ pipeline{
           script{
             if(currentBuild.result == &apos;SUCCESS&apos;){
                 if(BUILD_TYPE.equals(&apos;develop&apos;)){
-                    try{
-                        sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.develop ${FOLDER}&quot;
-                    }catch(err){
-                        error(text)
-                        currentBuild.result = &apos;ABORTED&apos;
-                    }
+                    is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.develop ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${JOB_NAME}.develop&quot;)
                 }else if(BUILD_TYPE.equals(&apos;pre-release&apos;)){
-                    try{
-                        sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.pre-release ${FOLDER}&quot;
-                    }catch(err){
-                        error(text)
-                        currentBuild.result = &apos;ABORTED&apos;
-                    }
+                    is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.pre-release ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${JOB_NAME}.pre-release&quot;)
                 }else if(BUILD_TYPE.equals(&apos;release&apos;)){
-                    try{
-                        sh &quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.release ${FOLDER}&quot;
-                    }catch(err){
-                        error(text)
-                        currentBuild.result = &apos;ABORTED&apos;
-                    }
+                    is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.release ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${JOB_NAME}.release&quot;)
                 }
             }  
           }
