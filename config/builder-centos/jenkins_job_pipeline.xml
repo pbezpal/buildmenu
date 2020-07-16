@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.39">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.0"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.0">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.1">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -62,8 +62,9 @@ String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
 String TYPE = &quot;${params.TYPE}&quot;
 String GIT_URL = &quot;${params.GIT_URL}&quot;
 String BUILD_TYPE = &quot;${params.BUILD_TYPE}&quot;
-String CURRENT_DATE = new Date().format(&apos;dd.MM.yyyy_HH:mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
+String CURRENT_DATE = new Date().format(&apos;yyyy-MM-dd-HH-mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
 String FOLDER = &quot;${CURRENT_DATE}_${params.VERSION}-${BUILD_NUMBER}&quot;
+String REPO = null
 
 def is_result_shell_build(command,text){
     if(currentBuild.result == &apos;SUCCESS&apos;){
@@ -109,6 +110,13 @@ pipeline{
                 }
             }
 		    currentBuild.result = &quot;SUCCESS&quot;
+		    if(BUILD_TYPE.equals(&apos;develop&apos;)){
+                    REPO = &quot;${JOB_NAME}.develop&quot;
+                }else if(BUILD_TYPE.equals(&apos;pre-release&apos;)){
+                    REPO = &quot;${JOB_NAME}.pre-release&quot;
+                }else if(BUILD_TYPE.equals(&apos;release&apos;)){
+                    REPO = &quot;${JOB_NAME}.release&quot;
+                }
           }
         }
       }
@@ -123,13 +131,7 @@ pipeline{
           echo &quot;========== Push ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} to repo ==========&quot;
           script{
             if(currentBuild.result == &apos;SUCCESS&apos;){
-                if(BUILD_TYPE.equals(&apos;develop&apos;)){
-                    is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.develop ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${JOB_NAME}.develop&quot;)
-                }else if(BUILD_TYPE.equals(&apos;pre-release&apos;)){
-                    is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.pre-release ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${JOB_NAME}.pre-release&quot;)
-                }else if(BUILD_TYPE.equals(&apos;release&apos;)){
-                    is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${JOB_NAME}.release ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${JOB_NAME}.release&quot;)
-                }
+                is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${REPO} ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${REPO}&quot;)
             }  
           }
         }

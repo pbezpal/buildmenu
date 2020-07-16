@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.39">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.0"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.0">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.1">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -50,6 +50,12 @@
           <defaultValue>server</defaultValue>
           <trim>true</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_TYPE</name>
+          <description></description>
+          <defaultValue>develop</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -62,18 +68,16 @@ String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
 String TYPE = &quot;${params.TYPE}&quot;
 String GIT_URL = &quot;${params.GIT_URL}&quot;
 String BUILD_TIME = &quot;${params.BUILD_TIME}&quot;
-String CURRENT_DATE = new Date().format(&apos;dd.MM.yyyy_HH:mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
-String FOLDER = &quot;${CURRENT_DATE}_${params.VERSION}-${BUILD_NUMBER}&quot;
+String BUILD_TYPE = &quot;${params.BUILD_TYPE}&quot;
+String CURRENT_DATE = new Date().format(&apos;yyyy-MM-dd-HH-mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
+String FOLDER = &quot;${CURRENT_DATE}-${params.VERSION}-${BUILD_NUMBER}&quot;
+String REPO = null
 
 def is_result_shell_build(command,text){
     if(currentBuild.result == &apos;SUCCESS&apos;){
         try{
             sh command    
         }catch(err){
-            sh &quot;/opt/delete_linux_client.sh ${WORKSPACE}/result/linux/ ${FOLDER}&quot;
-            sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/macos/x64/roschat-${VERSION}-${BUILD_NUMBER}.dmg&quot;
-            sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe&quot;
-            sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe&quot;
             currentBuild.result = &apos;FAILURE&apos;
             error(text)
         }
@@ -104,6 +108,11 @@ pipeline{
 	          return;
             }
 		    currentBuild.result = &quot;SUCCESS&quot;
+		    if(BUILD_TYPE.equals(&apos;develop&apos;)) REPO = &apos;roschat-client&apos;
+		    else{
+		        REPO = &apos;roschat-client.release&apos;
+		        is_result_shell_build(&quot;rsync -r -e ${WORKSPACE}/* /ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${FOLDER}/&quot;,&quot;Error copying source code to ftp&quot;)
+		    }
           }
         }
       }
@@ -112,7 +121,7 @@ pipeline{
           echo &quot;========== Build linux client ==========&quot;
           is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;Can&apos;t build linux client&quot;)
           echo &quot;========== Push linux client to repo ==========&quot;
-          is_result_shell_build(&quot;/opt/push_linux_client.sh ${WORKSPACE}/result/linux/ ${FOLDER}&quot;,&quot;Can&apos;t push linux client to repo&quot;)
+          is_result_shell_build(&quot;/opt/push_linux_client.sh ${WORKSPACE}/result/linux/ ${REPO} ${FOLDER}&quot;,&quot;Can&apos;t push linux client to repo&quot;)
         }
       }
       stage(&quot;Cleaning build directory on macos&quot;){
@@ -131,7 +140,7 @@ pipeline{
           echo &quot;========== Running build client on macos ==========&quot;
           is_result_shell_build(&quot;sshpass -p &apos;develop&apos; ssh developer@10.10.38.175 &apos;/usr/local/bin/node /usr/local/bin/electron-installer-dmg darwin/РосЧат.app  --overwrite darwin/roschat-${VERSION}-${BUILD_NUMBER}&apos;&quot;,&quot;Can&apos;t build macos client&quot;)
           echo &quot;========== Push macos client to repo ==========&quot;
-          is_result_shell_build(&quot;sshpass -p &apos;develop&apos; ssh developer@10.10.38.175 curl -v -u &apos;admin:Y@rd87846259&apos; --upload-file /Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/macos/x64/roschat-${VERSION}-${BUILD_NUMBER}.dmg&quot;,&quot;Can&apos;t push macos client to repo&quot;)
+          is_result_shell_build(&quot;sshpass -p &apos;develop&apos; ssh developer@10.10.38.175 curl -v -u &apos;admin:Y@rd87846259&apos; --upload-file /Users/developer/darwin/roschat-${VERSION}-${BUILD_NUMBER}.dmg http://10.10.199.217:8080/repository/${REPO}/${FOLDER}/macos/x64/roschat-${VERSION}-${BUILD_NUMBER}.dmg&quot;,&quot;Can&apos;t push macos client to repo&quot;)
         }
       }
 	  stage(&quot;Create temp directory for client of windows&quot;){
@@ -151,7 +160,7 @@ pipeline{
 		  echo &quot;========== Delete exe file after build client of windows/x64 ==========&quot;
           is_result_shell_build(&quot;rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe&quot;,&quot;Can&apos;t delete exe file after build client of windows/x64&quot;)
           echo &quot;========== Push client of windows/x64 to repo ==========&quot;
-          is_result_shell_build(&quot;curl -v -u &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe&quot;,&quot;Can&apos;t push client of windows/x64 to repo&quot;)
+          is_result_shell_build(&quot;curl -v -u &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe http://10.10.199.217:8080/repository/${REPO}/${FOLDER}/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe&quot;,&quot;Can&apos;t push client of windows/x64 to repo&quot;)
         }
       }
 	  stage(&quot;Build client of windows/ia32&quot;){
@@ -163,9 +172,21 @@ pipeline{
 		  echo &quot;========== Delete exe file after build client of windows/ia32 ==========&quot;
           is_result_shell_build(&quot;rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe&quot;,&quot;Can&apos;t delete exe file after build client of windows/ia32&quot;)
           echo &quot;========== Push client of windows/x64 to repo ==========&quot;
-          is_result_shell_build(&quot;curl -v -u &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe http://10.10.199.217:8080/repository/roschat-client/${FOLDER}/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe&quot;,&quot;Can&apos;t push client of windows/ia32 to repo&quot;)
+          is_result_shell_build(&quot;curl -v -u &apos;admin:Y@rd87846259&apos; --upload-file ${WORKSPACE}/result/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe http://10.10.199.217:8080/repository/${REPO}/${FOLDER}/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe&quot;,&quot;Can&apos;t push client of windows/ia32 to repo&quot;)
         }
       }
+    }
+    post{
+        always{
+            script{
+                if(currentBuild.result != &quot;SUCCESS&quot;){
+                    sh &quot;/opt/delete_linux_client.sh ${WORKSPACE}/result/linux/ ${REPO} ${FOLDER}&quot;
+                    sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/${REPO}/${FOLDER}/macos/x64/roschat-${VERSION}-${BUILD_NUMBER}.dmg&quot;
+                    sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/${REPO}/${FOLDER}/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe&quot;
+                    sh &quot;curl -v -u &apos;admin:Y@rd87846259&apos; -X DELETE http://10.10.199.217:8080/repository/${REPO}/${FOLDER}/windows/ia32/roschat-${VERSION}.${BUILD_NUMBER}.ia32.exe&quot;
+                }
+            }
+        }
     }
 }</script>
     <sandbox>true</sandbox>
