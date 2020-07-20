@@ -63,7 +63,7 @@ String TYPE = &quot;${params.TYPE}&quot;
 String GIT_URL = &quot;${params.GIT_URL}&quot;
 String BUILD_TYPE = &quot;${params.BUILD_TYPE}&quot;
 String CURRENT_DATE = new Date().format(&apos;yyyy-MM-dd-HH-mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
-String FOLDER = &quot;${CURRENT_DATE}_${params.VERSION}-${BUILD_NUMBER}&quot;
+String FOLDER = &quot;${CURRENT_DATE}-${params.VERSION}-${BUILD_NUMBER}&quot;
 String REPO = null
 
 def is_result_shell_build(command,text){
