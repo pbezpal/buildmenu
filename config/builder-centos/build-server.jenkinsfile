@@ -87,7 +87,7 @@ pipeline{
           }
         }
       }
-      stage("Rsync rpm for build and testing server"){
+      /*stage("Rsync rpm for build and testing server"){
         steps{
             echo "========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server =========="
             is_result_shell_build("ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*","Can't remove old version rpm")
@@ -105,6 +105,6 @@ pipeline{
             }
           }
         }
-      }
+      }*/
     }
 }
