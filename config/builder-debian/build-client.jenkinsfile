@@ -48,7 +48,7 @@ pipeline{
 	    currentBuild.result = "SUCCESS"
 	    
 	    if(BUILD_TYPE.equals('develop')){
-	      REPO = "${JOB_NAME}"  
+	      REPO = "${JOB_NAME}.develop"
 	    }else if(BUILD_TYPE.equals('pre-release')){
               REPO = "${JOB_NAME}.pre-release"  
             }else if(BUILD_TYPE.equals('release')){

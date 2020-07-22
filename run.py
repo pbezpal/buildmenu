@@ -76,14 +76,20 @@ if not nameuser.name == None:
     users = filterUsers(nameuser.name)
 
 def userSelected(user=None):
-    password=hashlib.md5(getpass.getpass("Enter password: ").encode("utf-8")).hexdigest()
-    if(password == user['password']):
-        global username
-        username = user['username']
-        global token
-        token = user['token'][::-1]
+    i = 0
+    while i < 3:
+        password=hashlib.md5(getpass.getpass("Enter password: ").encode("utf-8")).hexdigest()
+        if password == user['password']:
+            global username
+            username = user['username']
+            global token
+            token = user['token'][::-1]
+            break
+        else:
+            print("Wrong password, please try again")
+        i = i + 1
     else:
-        print("Wrong password")
+        print("You entered the wrong password 3 times. Can't start build.")
         exit(0)
 
 
@@ -213,66 +219,37 @@ def build(project):
         else:
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_pipeline.xml', 'r').read()
         print('Job sent to Jenkins', jenkins_host)
-        if not project['name'] == 'roschat-client':
-            print("\r\nList type build:\r\n")
-            print("1. Develop")
-            print("2. Pre-Release")
-            print("3. Release")
-            print("\nq: Quit")
-            while True:
-                type_build = input("Select type build: ")
-                if type_build.isnumeric():
-                    type_build = int(type_build)
-                    if type_build == 1:
-                        build_type = 'develop'
-                        break
-                    elif type_build == 2:
-                        build_type = 'pre-release'
-                        break
-                    elif type_build == 3:
-                        build_type = 'release'
-                        break
-                elif type_build == 'q':
-                    exit(0)
-            parameters = {
-                "PROJECT_NAME": project['name'],
-                "GIT_URL": project['git']['url'],
-                "BRANCH": project['git']['branch'],
-                "BUILD_CMD": project['buildCmd'],
-                "BUILD_MACHINE": project['buildMachine'],
-                "VERSION": re.sub(r'e', '', project['git']['tag']),
-                "TYPE": project['type'],
-                "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M'),
-                "BUILD_TYPE": build_type
-            }
-        else:
-            print("\r\nList type build:\r\n")
-            print("1. Develop")
-            print("2. Release")
-            print("\nq: Quit")
-            while True:
-                type_build = input("Select type build: ")
-                if type_build.isnumeric():
-                    type_build = int(type_build)
-                    if type_build == 1:
-                        build_type = 'develop'
-                        break
-                    elif type_build == 2:
-                        build_type = 'release'
-                        break
-                elif type_build == 'q':
-                    exit(0)
-            parameters = {
-                "PROJECT_NAME": project['name'],
-                "GIT_URL": project['git']['url'],
-                "BRANCH": project['git']['branch'],
-                "BUILD_CMD": project['buildCmd'],
-                "BUILD_MACHINE": project['buildMachine'],
-                "VERSION": re.sub(r'e', '', project['git']['tag']),
-                "TYPE": project['type'],
-                "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M'),
-                "BUILD_TYPE": build_type
-            }
+        print("\r\nList type build:\r\n")
+        print("1. Develop")
+        print("2. Pre-Release")
+        print("3. Release")
+        print("\nq: Quit")
+        while True:
+            type_build = input("Select type build: ")
+            if type_build.isnumeric():
+                type_build = int(type_build)
+                if type_build == 1:
+                    build_type = 'develop'
+                    break
+                elif type_build == 2:
+                    build_type = 'pre-release'
+                    break
+                elif type_build == 3:
+                    build_type = 'release'
+                    break
+            elif type_build == 'q':
+                exit(0)
+        parameters = {
+            "PROJECT_NAME": project['name'],
+            "GIT_URL": project['git']['url'],
+            "BRANCH": project['git']['branch'],
+            "BUILD_CMD": project['buildCmd'],
+            "BUILD_MACHINE": project['buildMachine'],
+            "VERSION": re.sub(r'e', '', project['git']['tag']),
+            "TYPE": project['type'],
+            "BUILD_TIME": datetime.now().strftime('%d.%m.%Y_%H:%M'),
+            "BUILD_TYPE": build_type
+        }
         print(project['git']['branch'])
         if not jenkins_helper.job_exists(project['name']):
             jenkins_helper.create_job(project['name'], jenkins_job)

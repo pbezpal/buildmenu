@@ -47,117 +47,31 @@
         <hudson.model.StringParameterDefinition>
           <name>BUILD_TYPE</name>
           <description></description>
-          <defaultValue>pre-relsease</defaultValue>
+          <defaultValue>pre-release</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.81">
-    <script>#!groovy
-
-String BRANCH = &quot;${params.BRANCH}&quot;
-String VERSION = &quot;${params.VERSION}&quot;
-String BUILD_CMD = &quot;${params.BUILD_CMD}&quot;
-String TYPE = &quot;${params.TYPE}&quot;
-String GIT_URL = &quot;${params.GIT_URL}&quot;
-String BUILD_TYPE = &quot;${params.BUILD_TYPE}&quot;
-String CURRENT_DATE = new Date().format(&apos;yyyy-MM-dd-HH-mm&apos;, TimeZone.getTimeZone(&quot;Europe/Moscow&quot;))
-String FOLDER = &quot;${CURRENT_DATE}-${params.VERSION}-${BUILD_NUMBER}&quot;
-String REPO = null
-
-def is_result_shell_build(command,text){
-    if(currentBuild.result == &apos;SUCCESS&apos;){
-        try{
-            sh command    
-        }catch(err){
-            currentBuild.result = &apos;FAILURE&apos;
-            error(text)
-        }
-    }
-}
-
-pipeline{
-    agent {
-        label &apos;centos&apos;
-    }
-    options { timestamps () }
-    stages{
-      
-      stage(&quot;Cleaning the build directory&quot;){
-        steps{
-          deleteDir();
-        }
-      }
-      stage(&quot;Cloning from a git repository&quot;){
-        steps{
-          echo &quot;========== Cloning GIT ==========&quot;
-          script{
-            try{
-              checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;${BRANCH}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;${GIT_URL}&apos;]]])
-            }catch(err){
-              currentBuild.result = &quot;FAILURE&quot;
-              error(&quot;Error copying from git repository&quot;)
-	          return;
-            }
-            if(BUILD_TYPE.equals(&apos;pre-release&apos;) || BUILD_TYPE.equals(&apos;release&apos;)){
-                try{
-                    sh &quot;sshpass -p \&quot;34appterr21\&quot; rsync -r -e ssh ${WORKSPACE}/* jenkins@10.10.199.31:/ftp/releases/RosChat/${TYPE}/${JOB_NAME}/${FOLDER}/&quot;
-                }catch(err){
-                    currentBuild.result = &quot;FAILURE&quot;
-                    error(&quot;Error copying source code to ftp&quot;)
-	                return;
-                }
-            }
-		    currentBuild.result = &quot;SUCCESS&quot;
-		    if(BUILD_TYPE.equals(&apos;develop&apos;)){
-                    REPO = &quot;${JOB_NAME}.develop&quot;
-                }else if(BUILD_TYPE.equals(&apos;pre-release&apos;)){
-                    REPO = &quot;${JOB_NAME}.pre-release&quot;
-                }else if(BUILD_TYPE.equals(&apos;release&apos;)){
-                    REPO = &quot;${JOB_NAME}.release&quot;
-                }
-          }
-        }
-      }
-      stage(&quot;Build rpm&quot;){
-        steps{
-          echo &quot;========== Build ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} ==========&quot;
-          is_result_shell_build(&quot;$BUILD_CMD&quot;,&quot;The result of the assembly - failed&quot;)
-        }
-      }
-      stage(&quot;Push rpm to repo&quot;){
-        steps{
-          echo &quot;========== Push ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} to repo ==========&quot;
-          script{
-            if(currentBuild.result == &apos;SUCCESS&apos;){
-                is_result_shell_build(&quot;/opt/push_rpm_repo.sh ${WORKSPACE} ${REPO} ${FOLDER}&quot;,&quot;Can&apos;t push rpm to ${REPO}&quot;)
-            }  
-          }
-        }
-      }
-      stage(&quot;Rsync rpm for build and testing server&quot;){
-        steps{
-            echo &quot;========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server ==========&quot;
-            is_result_shell_build(&quot;ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*&quot;,&quot;Can&apos;t remove old version rpm&quot;)
-            is_result_shell_build(&quot;rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms&quot;,&quot;Can&apos;t push rpm&quot;)
-            is_result_shell_build(&quot;echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} &gt; /tmp/build&quot;,&quot;Can&apos;t write mark&quot;)
-            is_result_shell_build(&quot;rsync /tmp/build root@10.10.199.47:/tmp&quot;,&quot;Can&apos;t push mark&quot;)
-            is_result_shell_build(&quot;rm -f /tmp/build&quot;,&quot;Can&apos;t delete tmp mark&quot;)
-        }
-      }
-      stage(&quot;Run job build server&quot;){
-        steps{
-          script{
-            if(currentBuild.result == &apos;SUCCESS&apos;){
-                build job: &apos;roschat-server_docker&apos;, wait: false   
-            }
-          }
-        }
-      }
-    }
-}</script>
-    <sandbox>true</sandbox>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.81">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@4.3.0">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>ssh://shavlovskiy_sn@10.10.199.35/opt/git/ormp_builds</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/master</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>config/builder-centos/build-server.jenkinsfile</scriptPath>
+    <lightweight>true</lightweight>
   </definition>
   <triggers/>
   <authToken>110afafd6a5bbe698b1e69a37390daaafd</authToken>
