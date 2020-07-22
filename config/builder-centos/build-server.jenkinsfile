@@ -1,0 +1,110 @@
+#!groovy
+
+String BRANCH = "${params.BRANCH}"
+String VERSION = "${params.VERSION}"
+String BUILD_CMD = "${params.BUILD_CMD}"
+String TYPE = "${params.TYPE}"
+String GIT_URL = "${params.GIT_URL}"
+String BUILD_TYPE = "${params.BUILD_TYPE}"
+String CURRENT_DATE = new Date().format('yyyy-MM-dd-HH-mm', TimeZone.getTimeZone("Europe/Moscow"))
+String FOLDER = "${CURRENT_DATE}-${params.VERSION}-${BUILD_NUMBER}"
+String REPO = null
+
+def is_result_shell_build(command,text){
+    if(currentBuild.result == 'SUCCESS'){
+        try{
+            sh command    
+        }catch(err){
+            currentBuild.result = 'FAILURE'
+            error(text)
+        }
+    }
+}
+
+pipeline{
+    agent {
+        label 'centos'
+    }
+    options { timestamps () }
+    stages{
+      
+      stage("Cleaning the build directory"){
+        steps{
+          deleteDir();
+        }
+      }
+      stage("Cloning from a git repository"){
+        steps{
+          echo "========== Cloning GIT =========="
+          script{
+            try{
+              checkout([$class: 'GitSCM', branches: [[name: '${BRANCH}']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: '${GIT_URL}']]])
+            }catch(err){
+              currentBuild.result = "FAILURE"
+              error("Error copying from git repository")
+              return;
+            }
+            
+            currentBuild.result = "SUCCESS"
+            
+            if(BUILD_TYPE.equals('develop')){
+	      REPO = "${JOB_NAME}.develop"  
+	    }else if(BUILD_TYPE.equals('pre-release')){
+              REPO = "${JOB_NAME}.pre-release"  
+            }else if(BUILD_TYPE.equals('release')){
+                REPO = "${JOB_NAME}.release"
+            }
+            
+            if(BUILD_TYPE.equals('pre-release') || BUILD_TYPE.equals('release')){
+                stage("Compress and upload source code"){
+                    echo "========== Cloning GIT for compress source to tar =========="
+                    is_result_shell_build("git clone ssh://bezpalko_p@10.10.199.35/opt/git/ormp_nexus","Can't git clone")
+                    echo "========== Compress source to tar =========="
+                    is_result_shell_build("${WORKSPACE}/ormp_nexus/sources.py ${JOB_NAME}","Can't compress source to tar")
+                    echo "========== Upload tar file to repo =========="
+                    is_result_shell_build("${WORKSPACE}/ormp_nexus/upload_files_to_repo.py ${WORKSPACE}/source roschat-sources ${JOB_NAME} ${FOLDER}","Can't push tar to roschat-sources")    
+                }
+            }
+          }
+        }
+      }
+      stage("Build rpm"){
+        steps{
+          echo "========== Build ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} =========="
+          is_result_shell_build("$BUILD_CMD","The result of the assembly - failed")
+        }
+      }
+      stage("Push rpm to repo"){
+        steps{
+          echo "========== Push ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} to repo =========="
+          script{
+            if(BUILD_TYPE.equals('develop')){
+                echo "========== Cloning git for upload clients to repo ========="
+                is_result_shell_build("git clone ssh://bezpalko_p@10.10.199.35/opt/git/ormp_nexus","Can't git clone for upload files to ${REPO}")
+            }
+            echo "========== Upload files to repo ========="
+            is_result_shell_build("/${WORKSPACE}/ormp_nexus/upload_files_to_repo.py ${WORKSPACE}/result/ ${REPO} ${FOLDER}","Can't push linux client to repo")
+          }
+        }
+      }
+      stage("Rsync rpm for build and testing server"){
+        steps{
+            echo "========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server =========="
+            is_result_shell_build("ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*","Can't remove old version rpm")
+            is_result_shell_build("rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms","Can't push rpm")
+            is_result_shell_build("echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} > /tmp/build","Can't write mark")
+            is_result_shell_build("rsync /tmp/build root@10.10.199.47:/tmp","Can't push mark")
+            is_result_shell_build("rm -f /tmp/build","Can't delete tmp mark")
+        }
+      }
+      stage("Run job build server"){
+        steps{
+          script{
+            if(currentBuild.result == 'SUCCESS'){
+                build job: 'roschat-server_docker', wait: false   
+            }
+          }
+        }
+      }
+    }
+}
