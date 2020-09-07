@@ -90,10 +90,10 @@ pipeline{
       stage("Rsync rpm for build and testing server"){
         steps{
             echo "========== Rsync ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} on server =========="
-            is_result_shell_build("ssh root@10.10.199.47 rm -f /tmp/rpms/${JOB_NAME}-*","Can't remove old version rpm")
-            is_result_shell_build("rsync ${WORKSPACE}/result/* root@10.10.199.47:/tmp/rpms","Can't push rpm")
+            is_result_shell_build("ssh root@10.10.199.47 rm -f /opt/rpms/${JOB_NAME}-*","Can't remove old version rpm")
+            is_result_shell_build("rsync ${WORKSPACE}/result/* root@10.10.199.47:/opt/rpms","Can't push rpm")
             is_result_shell_build("echo ${JOB_NAME}_${VERSION}-${BUILD_NUMBER} > /tmp/build","Can't write mark")
-            is_result_shell_build("rsync /tmp/build root@10.10.199.47:/tmp","Can't push mark")
+            is_result_shell_build("rsync /tmp/build root@10.10.199.47:/opt","Can't push mark")
             is_result_shell_build("rm -f /tmp/build","Can't delete tmp mark")
         }
       }

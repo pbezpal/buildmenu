@@ -211,7 +211,7 @@ def build(project):
         """Deleting roschat-node-module for copy new version to server build docker"""
         if project['name'] == 'roschat-server':
             shell = spur.SshShell(hostname="10.10.199.47", username="root", password="nimda123",missing_host_key=spur.ssh.MissingHostKey.accept)
-            shell.run(["sh", "-c","rm -f /tmp/rpms/roschat-node-modules-*"])
+            shell.run(["sh", "-c","rm -f /opt/rpms/roschat-node-modules-*"])
         if project['name'] == 'roschat-client':
             jenkins_job = open(script_dir+'/config/builder-'+project['buildMachine']+'/jenkins_job_client_pipeline.xml', 'r').read()
         elif namespace.test:
