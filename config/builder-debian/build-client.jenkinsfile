@@ -14,7 +14,7 @@ String REPO = null
 def is_result_shell_build(command,text){
     if(currentBuild.result == 'SUCCESS'){
         try{
-            sh command    
+            sh command
         }catch(err){
             currentBuild.result = 'FAILURE'
             error(text)
@@ -28,7 +28,7 @@ pipeline{
     }
     options { timestamps () }
     stages{
-      
+
       stage("Cleaning the build directory"){
         steps{
           deleteDir();
@@ -46,15 +46,15 @@ pipeline{
               return;
             }
 	    currentBuild.result = "SUCCESS"
-	    
+
 	    if(BUILD_TYPE.equals('develop')){
 	      REPO = "${JOB_NAME}.develop"
 	    }else if(BUILD_TYPE.equals('pre-release')){
-              REPO = "${JOB_NAME}.pre-release"  
+              REPO = "${JOB_NAME}.pre-release"
             }else if(BUILD_TYPE.equals('release')){
                 REPO = "${JOB_NAME}.release"
             }
-            
+
             if(BUILD_TYPE.equals('pre-release') || BUILD_TYPE.equals('release')){
                 stage("Compress and upload source code"){
                     echo "========== Cloning GIT for compress source to tar =========="
@@ -62,7 +62,7 @@ pipeline{
                     echo "========== Compress source to tar =========="
                     is_result_shell_build("${WORKSPACE}/ormp_nexus/sources.py ${JOB_NAME}","Can't compress source to tar")
                     echo "========== Upload tar file to repo =========="
-                    is_result_shell_build("${WORKSPACE}/ormp_nexus/upload_files_to_repo.py ${WORKSPACE}/source roschat-sources ${JOB_NAME} ${FOLDER}","Can't push tar to roschat-sources")    
+                    is_result_shell_build("${WORKSPACE}/ormp_nexus/upload_files_to_repo.py ${WORKSPACE}/source roschat-sources ${JOB_NAME} ${FOLDER}","Can't push tar to roschat-sources")
                 }
             }
           }
@@ -102,7 +102,7 @@ pipeline{
 	  echo "========== Creating temp directory for client of windows/ia32 =========="
           is_result_shell_build("mkdir -p ${WORKSPACE}/result/windows/ia32","Can't create temp directory for client of windows/ia32")
         }
-      }	  
+      }
       stage("Build windows x64 client"){
         steps{
           echo "========== Build client for windows/x64 =========="
@@ -111,6 +111,12 @@ pipeline{
           is_result_shell_build("osslsigncode sign -pkcs12 /var/opt/n1.pfx -pass V090807It -h sha2 -t http://timestamp.comodoca.com/authenticode -in ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe -out ${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe","Can't singing ssl code to client of windows/x64")
 	  echo "========== Delete exe file after build client of windows/x64 =========="
           is_result_shell_build("rm -f ${WORKSPACE}/clients/demo/js/electron/dist/roschat-${VERSION}.${BUILD_NUMBER}.exe","Can't delete exe file after build client of windows/x64")
+        }
+      }
+      stage("The client is updated on Windows x64"){
+        steps{
+          echo "========== The client is updating on Windows 10 x64 =========="
+          is_result_shell_build("ansible-playbook -vvvv -i /etc/ansible/windows/hosts /etc/ansible/windows/playbooks/windows.yml -e "client=${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe"","The desktop client don't update to Windows x64")
         }
       }
       stage("Build windows ia32 client"){
@@ -131,7 +137,7 @@ pipeline{
                 is_result_shell_build("git clone ssh://bezpalko_p@10.10.199.35/opt/git/ormp_nexus","Can't git clone for upload files to ${REPO}")
                 }
                 echo "========== Upload files to repo ========="
-                is_result_shell_build("/${WORKSPACE}/ormp_nexus/upload_files_to_repo.py ${WORKSPACE}/result/ ${REPO} ${FOLDER}","Can't push linux client to repo")       
+                is_result_shell_build("/${WORKSPACE}/ormp_nexus/upload_files_to_repo.py ${WORKSPACE}/result/ ${REPO} ${FOLDER}","Can't push linux client to repo")
               }
           }
         }
