@@ -116,7 +116,7 @@ pipeline{
       stage("The client is updated on Windows x64"){
         steps{
           echo "========== The client is updating on Windows 10 x64 =========="
-          is_result_shell_build("ansible-playbook -vvvv -i /etc/ansible/windows/hosts /etc/ansible/windows/playbooks/windows.yml -e "client=${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe"","The desktop client don't update to Windows x64")
+          is_result_shell_build("ansible-playbook -vvvv -i /etc/ansible/windows/hosts /etc/ansible/windows/playbooks/windows.yml -e \"client=${WORKSPACE}/result/windows/x64/roschat-${VERSION}.${BUILD_NUMBER}.x64.exe\"","The desktop client don't update to Windows x64")
         }
       }
       stage("Build windows ia32 client"){
