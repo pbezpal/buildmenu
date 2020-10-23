@@ -1,0 +1,11 @@
+file: group_vars/windows.yml
+ 
+ansible_user: User
+ 
+ansible_password: 12345678
+ 
+ansible_winrm_transport: basic
+ 
+ansible_connection: winrm
+ 
+ansible_winrm_server_cert_validation: ignore

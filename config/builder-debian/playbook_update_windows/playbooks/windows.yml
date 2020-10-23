@@ -1,0 +1,36 @@
+---
+ 
+- name: Update roschat client on windows x64
+  hosts: windows
+  tasks:
+     - name: Create temp directory
+       win_shell:
+         New-Item -Path 'C:\roschat' -ItemType 'Directory' -Force | Out-Null
+
+     - name: Copy exe file from linux to windows x64
+       win_copy:
+         src: '{{ client }}'
+         dest: c:\roschat\
+
+     - name: Update roschat client
+       win_shell: |
+         If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
+         {   
+           $arguments = "& '" + $myinvocation.mycommand.definition + "'"
+           Start-Process powershell -Verb runAs -ArgumentList $arguments
+           Break
+         }
+         if(Get-Process | where {$_.ProcessName -eq 'РосЧат'}){
+           Stop-Process -name 'РосЧат'
+         }
+         $roschat  = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*' | Get-ItemProperty | Where-Object {$_.DisplayName -match "РосЧат" } | Select-Object -Property UninstallString
+         $roschat = $roschat.UninstallString.Replace('{',' ').Replace('}',' ').Replace('/allusers','')
+         if($roschat){
+          Start-Process -NoNewWindow -FilePath $roschat -ArgumentList '/Queit /allusers /S /All'
+         }
+         Start-Process -NoNewWindow -FilePath 'C:\roschat\roschat-*.x64.exe' -ArgumentList '/Queit /S'
+
+     - name: Delete temp directory
+       win_file:
+         path: C:\roschat
+         state: absent
